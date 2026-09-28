@@ -38,16 +38,30 @@ window.AppChest = {
         card.className = "card";
 
         var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
+        var safeDesc = c.description || "";
 
-        card.innerHTML =
-          '<div style="margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; overflow: hidden;">' +
-            '<img src="' + imgSrc + '" alt="' + c.name + '" width="40" height="40" style="width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;" onerror="this.onerror=null; this.src=\'chest.png\';">' +
-          '</div>' +
-          '<h3 style="margin: 6px 0; font-size: 0.95rem; text-transform: uppercase;">' + c.name + '</h3>' +
-          '<p style="font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
-          '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
-            'OPEN [' + c.cost + 'G]' +
-          '</button>';
+        card.innerHTML = `
+          <div style="margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; overflow: hidden;">
+            <img src="${imgSrc}" alt="${c.name}" width="40" height="40" style="width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;">
+          </div>
+          <h3 style="margin: 6px 0; font-size: 0.95rem; text-transform: uppercase;">${c.name}</h3>
+          <p style="font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;">${safeDesc}</p>
+          <button class="btn btn-primary btn-block" data-crate-id="${c.id}">
+            OPEN [${c.cost}G]
+          </button>
+        `;
+
+        // Direct event listener so there are zero string-quoting conflicts
+        var btn = card.querySelector("button");
+        btn.addEventListener("click", function() {
+          AppChest.buyCrate(c.id);
+        });
+
+        // Safe fallback handler
+        var img = card.querySelector("img");
+        img.addEventListener("error", function() {
+          this.src = "chest.png";
+        });
 
         grid.appendChild(card);
       });
@@ -103,20 +117,23 @@ window.AppChest = {
       var cardEl = document.createElement("div");
       cardEl.className = "flip-card";
       cardEl.id = "pick-card-" + idx;
-      cardEl.onclick = function() { AppChest.revealPick(idx); };
+      cardEl.addEventListener("click", function() {
+        AppChest.revealPick(idx);
+      });
 
-      cardEl.innerHTML =
-        '<div class="flip-card-inner">' +
-          '<div class="flip-card-front">' +
-            '<span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span>' +
-            '<div class="pixel-tag">CARD 0' + (idx + 1) + '</div>' +
-          '</div>' +
-          '<div class="flip-card-back rarity-' + item.rarity + '">' +
-            '<span style="font-size: 2.5rem; margin-bottom: 6px;">' + (item.icon || "💎") + '</span>' +
-            '<div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">' + item.name + '</div>' +
-            '<div class="pixel-tag">' + item.rarity.toUpperCase() + '</div>' +
-          '</div>' +
-        '</div>';
+      cardEl.innerHTML = `
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span>
+            <div class="pixel-tag">CARD 0${idx + 1}</div>
+          </div>
+          <div class="flip-card-back rarity-${item.rarity}">
+            <span style="font-size: 2.5rem; margin-bottom: 6px;">${item.icon || "💎"}</span>
+            <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">${item.name}</div>
+            <div class="pixel-tag">${item.rarity.toUpperCase()}</div>
+          </div>
+        </div>
+      `;
 
       container.appendChild(cardEl);
     });
