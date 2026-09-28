@@ -1,3 +1,5 @@
+// js/ChestMain.js
+
 window.AppChest = {
   crates: [],
   selectedCardIndex: null,
@@ -31,7 +33,8 @@ window.AppChest = {
 
       grid.innerHTML = "";
 
-      this.crates.forEach(function(c) {
+      for (var i = 0; i < this.crates.length; i++) {
+        var c = this.crates[i];
         var card = document.createElement("div");
         card.className = "card";
 
@@ -63,9 +66,11 @@ window.AppChest = {
         var btn = document.createElement("button");
         btn.className = "btn btn-primary btn-block";
         btn.innerText = "OPEN [" + c.cost + "G]";
-        btn.onclick = function() {
-          AppChest.buyCrate(c.id);
-        };
+        (function(crateId) {
+          btn.onclick = function() {
+            AppChest.buyCrate(crateId);
+          };
+        })(c.id);
 
         card.appendChild(imgBox);
         card.appendChild(title);
@@ -73,7 +78,7 @@ window.AppChest = {
         card.appendChild(btn);
 
         grid.appendChild(card);
-      });
+      }
     } catch (err) {
       grid.innerHTML = "<p class='status-msg danger'>Failed to load catalog: " + err.message + "</p>";
     }
@@ -122,27 +127,47 @@ window.AppChest = {
     if (btnCollect) btnCollect.style.display = "none";
     if (container) container.innerHTML = "";
 
-    this.generatedPicks.forEach(function(item, idx) {
-      var cardEl = document.createElement("div");
-      cardEl.className = "flip-card";
-      cardEl.id = "pick-card-" + idx;
-      cardEl.onclick = function() { AppChest.revealPick(idx); };
+    for (var idx = 0; idx < this.generatedPicks.length; idx++) {
+      (function(i, item) {
+        var cardEl = document.createElement("div");
+        cardEl.className = "flip-card";
+        cardEl.id = "pick-card-" + i;
+        cardEl.onclick = function() {
+          AppChest.revealPick(i);
+        };
 
-      cardEl.innerHTML =
-        '<div class="flip-card-inner">' +
-          '<div class="flip-card-front">' +
-            '<span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span>' +
-            '<div class="pixel-tag">CARD 0' + (idx + 1) + '</div>' +
-          '</div>' +
-          '<div class="flip-card-back rarity-' + item.rarity + '">' +
-            '<span style="font-size: 2.5rem; margin-bottom: 6px;">' + (item.icon || "💎") + '</span>' +
-            '<div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">' + item.name + '</div>' +
-            '<div class="pixel-tag">' + (item.rarity || "").toUpperCase() + '</div>' +
-          '</div>' +
-        '</div>';
+        var inner = document.createElement("div");
+        inner.className = "flip-card-inner";
 
-      container.appendChild(cardEl);
-    });
+        var front = document.createElement("div");
+        front.className = "flip-card-front";
+        front.innerHTML = '<span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span><div class="pixel-tag">CARD 0' + (i + 1) + '</div>';
+
+        var back = document.createElement("div");
+        back.className = "flip-card-back rarity-" + item.rarity;
+
+        var iconSpan = document.createElement("span");
+        iconSpan.style.cssText = "font-size: 2.5rem; margin-bottom: 6px;";
+        iconSpan.innerText = item.icon || "💎";
+
+        var nameDiv = document.createElement("div");
+        nameDiv.style.cssText = "font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;";
+        nameDiv.innerText = item.name;
+
+        var rarityDiv = document.createElement("div");
+        rarityDiv.className = "pixel-tag";
+        rarityDiv.innerText = (item.rarity || "").toUpperCase();
+
+        back.appendChild(iconSpan);
+        back.appendChild(nameDiv);
+        back.appendChild(rarityDiv);
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        cardEl.appendChild(inner);
+        container.appendChild(cardEl);
+      })(idx, this.generatedPicks[idx]);
+    }
 
     if (modal) modal.style.display = "flex";
   },
@@ -156,12 +181,12 @@ window.AppChest = {
     if (pickedCard) pickedCard.classList.add("flipped");
 
     setTimeout(function() {
-      [0, 1, 2].forEach(function(idx) {
+      for (var idx = 0; idx < 3; idx++) {
         if (idx !== selectedIndex) {
           var other = document.getElementById("pick-card-" + idx);
           if (other) other.classList.add("flipped", "missed");
         }
-      });
+      }
     }, 300);
 
     var rpcRes = await supabaseClient.rpc("claim_card", {
