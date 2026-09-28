@@ -40,15 +40,14 @@ window.AppChest = {
 
         var imgSrc = (c.icon && c.icon.indexOf(".") !== -1) ? c.icon : "chest.png";
 
+       // Change imgBox and img to this:
         var imgBox = document.createElement("div");
-        imgBox.style.cssText = "margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px;";
+        imgBox.style.cssText = "margin: 8px auto; display: flex; justify-content: center; align-items: center; width: 100%; height: 48px; overflow: visible;";
 
         var img = document.createElement("img");
         img.src = imgSrc;
         img.alt = c.name || "Crate";
-        img.width = 40;
-        img.height = 40;
-        img.style.cssText = "width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;";
+        img.style.cssText = "width: auto !important; height: 44px !important; max-width: 90% !important; max-height: 44px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;";
         img.onerror = function() {
           this.onerror = null;
           this.src = "chest.png";
