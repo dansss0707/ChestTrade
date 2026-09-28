@@ -159,7 +159,7 @@
       letter-spacing: 1px;
     }
 
-    /* ================= DOPAMINE OPENING MODAL ================= */
+    /* ================= OPENING MODAL ================= */
     #modal-opening, #modal-trading {
       display: none;
       position: fixed;
@@ -359,7 +359,7 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    /* ================= TRADING MODAL STYLING ================= */
+    /* ================= TRADING MODAL ================= */
     .trade-modal-window {
       background: #111422;
       border: 1px solid #334155;
@@ -441,7 +441,50 @@
       align-items: center;
     }
   </style>
+
+  <!-- 1. Supabase JS CDN Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- 2. Supabase Client & AppState Setup -->
+  <script>
+    // FILL THESE TWO VALUES WITH YOUR ACTUAL SUPABASE PROJECT CREDENTIALS:
+    const SUPABASE_URL = "https://your-project-id.supabase.co";
+    const SUPABASE_ANON_KEY = "your-anon-key-here";
+
+    // Initialize client globally on window so every script can access it
+    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Global session state
+    window.AppState = window.AppState || {
+      user: null,
+      profile: { coins: 0 }
+    };
+
+    // Keep session and profile synced
+    async function syncSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        AppState.user = session.user;
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        if (profile) {
+          AppState.profile = profile;
+          const coinEl = document.getElementById("user-coins");
+          if (coinEl) coinEl.innerText = profile.coins || 0;
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await syncSession();
+      if (window.AppChest && AppChest.init) {
+        AppChest.init();
+      }
+    });
+  </script>
 </head>
 <body>
 
@@ -455,7 +498,7 @@
 
   <main id="chest-grid"></main>
 
-  <!-- PACK OPENING STAGE MODAL -->
+  <!-- PACK OPENING MODAL -->
   <div id="modal-opening">
     <div id="god-rays" class="god-rays"></div>
 
@@ -513,6 +556,7 @@
     </div>
   </div>
 
+  <!-- 3. Logic script loaded after Supabase initialization -->
   <script src="js/ChestMain.js"></script>
 </body>
 </html>
