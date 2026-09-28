@@ -527,10 +527,10 @@ input:focus {
 }
 
 #chest-grid .card img {
-  width: 110px !important;
-  height: 110px !important;
-  max-width: 110px !important;
-  max-height: 110px !important;
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
   object-fit: contain !important;
   image-rendering: pixelated !important;
   transform: none !important;
