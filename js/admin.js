@@ -52,15 +52,15 @@ window.AppAdmin = {
       return;
     }
     if (isNaN(cost) || cost < 0) {
-      this.setStatus("Please enter a valid Gold Cost (0 or more).", true);
+      this.setStatus("Please enter a valid Gold Cost.", true);
       return;
     }
 
-    // Generate safe alphanumeric ID
-    var randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    var crateId = "crate_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + randomSuffix;
+    // Explicitly generate a unique text ID so it can never be null
+    var uniqueSuffix = Math.random().toString(36).substring(2, 8);
+    var crateId = "crate_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + uniqueSuffix;
 
-    this.setStatus("Registering crate to database...", false);
+    this.setStatus("Registering crate...", false);
 
     try {
       var res = await supabaseClient
@@ -87,12 +87,11 @@ window.AppAdmin = {
 
       await this.populateCrateDropdown();
 
-      // Refresh store catalog immediately if AppChest is loaded
       if (window.AppChest && AppChest.loadCrates) {
         AppChest.loadCrates();
       }
     } catch (err) {
-      console.error("[AppAdmin] Crate creation failed:", err);
+      console.error("[AppAdmin] Error creating crate:", err);
       this.setStatus("Failed to create crate: " + (err.message || JSON.stringify(err)), true);
     }
   },
@@ -111,7 +110,7 @@ window.AppAdmin = {
     var value = valueEl ? parseInt(valueEl.value, 10) : NaN;
 
     if (!crateId) {
-      this.setStatus("Please select a target crate for this item.", true);
+      this.setStatus("Please select a target crate.", true);
       return;
     }
     if (!name) {
@@ -119,14 +118,15 @@ window.AppAdmin = {
       return;
     }
     if (isNaN(value) || value < 0) {
-      this.setStatus("Please enter a valid Base Value in gold.", true);
+      this.setStatus("Please enter a valid Base Value.", true);
       return;
     }
 
-    var randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    var itemId = "item_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + randomSuffix;
+    // Explicitly generate a unique text ID so it can never be null
+    var uniqueSuffix = Math.random().toString(36).substring(2, 8);
+    var itemId = "item_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + uniqueSuffix;
 
-    this.setStatus("Minting item into crate loot pool...", false);
+    this.setStatus("Minting item...", false);
 
     try {
       var res = await supabaseClient
@@ -151,7 +151,7 @@ window.AppAdmin = {
       iconEl.value = "";
       valueEl.value = "";
     } catch (err) {
-      console.error("[AppAdmin] Item creation failed:", err);
+      console.error("[AppAdmin] Error creating item:", err);
       this.setStatus("Failed to create item: " + (err.message || JSON.stringify(err)), true);
     }
   }
