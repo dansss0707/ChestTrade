@@ -11,12 +11,12 @@ window.AppChest = {
   },
 
   loadCrates: async function() {
-    var grid = document.getElementById("chest-grid");
+    const grid = document.getElementById("chest-grid");
     if (!grid) return;
-    grid.innerHTML = "<p class='subtitle'>> LOADING CRATE CATALOG...</p>";
+    grid.innerHTML = '<p class="subtitle">> LOADING CRATE CATALOG...</p>';
 
     try {
-      var res = await supabaseClient
+      const res = await supabaseClient
         .from("crates")
         .select("*")
         .eq("is_active", true)
@@ -27,54 +27,46 @@ window.AppChest = {
       this.crates = res.data || [];
 
       if (this.crates.length === 0) {
-        grid.innerHTML = "<p class='subtitle'>> NO CRATES AVAILABLE IN DATABASE.</p>";
+        grid.innerHTML = '<p class="subtitle">> NO CRATES AVAILABLE IN DATABASE.</p>';
         return;
       }
 
       grid.innerHTML = "";
 
-      for (var i = 0; i < this.crates.length; i++) {
-        var c = this.crates[i];
-        var card = document.createElement("div");
+      this.crates.forEach((c) => {
+        const card = document.createElement("div");
         card.className = "card";
 
-        var imgSrc = (c.icon && c.icon.indexOf(".") !== -1) ? c.icon : "chest.png";
+        const imgSrc = (c.icon && c.icon.indexOf(".") !== -1) ? c.icon : "chest.png";
 
-        // Image wrapper
-        var imgBox = document.createElement("div");
-        imgBox.style.cssText = "margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; overflow: hidden;";
+        const imgBox = document.createElement("div");
+        imgBox.style.cssText = "margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px;";
 
-        var img = document.createElement("img");
+        const img = document.createElement("img");
         img.src = imgSrc;
         img.alt = c.name || "Crate";
         img.width = 40;
         img.height = 40;
-        img.style.cssText = "width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;";
-        img.onerror = function() {
-          this.onerror = null;
+        img.style.cssText = "width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;";
+        img.addEventListener("error", function() {
           this.src = "chest.png";
-        };
+        });
         imgBox.appendChild(img);
 
-        // Title
-        var title = document.createElement("h3");
+        const title = document.createElement("h3");
         title.style.cssText = "margin: 6px 0; font-size: 0.95rem; text-transform: uppercase;";
         title.innerText = c.name;
 
-        // Description
-        var desc = document.createElement("p");
+        const desc = document.createElement("p");
         desc.style.cssText = "font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;";
         desc.innerText = c.description || "";
 
-        // Open Button
-        var btn = document.createElement("button");
+        const btn = document.createElement("button");
         btn.className = "btn btn-primary btn-block";
         btn.innerText = "OPEN [" + c.cost + "G]";
-        (function(crateId) {
-          btn.onclick = function() {
-            AppChest.buyCrate(crateId);
-          };
-        })(c.id);
+        btn.addEventListener("click", () => {
+          AppChest.buyCrate(c.id);
+        });
 
         card.appendChild(imgBox);
         card.appendChild(title);
@@ -82,15 +74,15 @@ window.AppChest = {
         card.appendChild(btn);
 
         grid.appendChild(card);
-      }
+      });
     } catch (err) {
-      grid.innerHTML = "<p class='status-msg danger'>Failed to load catalog: " + err.message + "</p>";
+      grid.innerHTML = '<p class="status-msg danger">Failed to load catalog: ' + err.message + '</p>';
     }
   },
 
   buyCrate: async function(crateId) {
     if (!AppState.profile) return;
-    var crate = this.crates.find(function(c) { return c.id === crateId; });
+    const crate = this.crates.find((c) => c.id === crateId);
     if (!crate) return;
 
     if (AppState.profile.coins < crate.cost) {
@@ -100,7 +92,7 @@ window.AppChest = {
 
     this.activeCrate = crate;
 
-    var res = await supabaseClient
+    const res = await supabaseClient
       .from("item_templates")
       .select("*")
       .eq("crate_id", crateId);
@@ -110,10 +102,10 @@ window.AppChest = {
       return;
     }
 
-    var items = res.data;
+    const items = res.data;
     this.generatedPicks = [];
-    for (var i = 0; i < 3; i++) {
-      var pick = items[Math.floor(Math.random() * items.length)];
+    for (let i = 0; i < 3; i++) {
+      const pick = items[Math.floor(Math.random() * items.length)];
       this.generatedPicks.push(pick);
     }
 
@@ -122,56 +114,39 @@ window.AppChest = {
   },
 
   renderOpeningStage: function() {
-    var modal = document.getElementById("modal-opening");
-    var container = document.getElementById("cards-container");
-    var title = document.getElementById("opening-chest-name");
-    var btnCollect = document.getElementById("btn-collect-loot");
+    const modal = document.getElementById("modal-opening");
+    const container = document.getElementById("cards-container");
+    const title = document.getElementById("opening-chest-name");
+    const btnCollect = document.getElementById("btn-collect-loot");
 
     if (title) title.innerText = "UNBOXING: " + this.activeCrate.name;
     if (btnCollect) btnCollect.style.display = "none";
     if (container) container.innerHTML = "";
 
-    for (var idx = 0; idx < this.generatedPicks.length; idx++) {
-      (function(i, item) {
-        var cardEl = document.createElement("div");
-        cardEl.className = "flip-card";
-        cardEl.id = "pick-card-" + i;
-        cardEl.onclick = function() {
-          AppChest.revealPick(i);
-        };
+    this.generatedPicks.forEach((item, idx) => {
+      const cardEl = document.createElement("div");
+      cardEl.className = "flip-card";
+      cardEl.id = "pick-card-" + idx;
+      cardEl.addEventListener("click", () => {
+        AppChest.revealPick(idx);
+      });
 
-        var inner = document.createElement("div");
-        inner.className = "flip-card-inner";
+      cardEl.innerHTML = `
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span>
+            <div class="pixel-tag">CARD 0${idx + 1}</div>
+          </div>
+          <div class="flip-card-back rarity-${item.rarity}">
+            <span style="font-size: 2.5rem; margin-bottom: 6px;">${item.icon || "💎"}</span>
+            <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">${item.name}</div>
+            <div class="pixel-tag">${(item.rarity || "").toUpperCase()}</div>
+          </div>
+        </div>
+      `;
 
-        var front = document.createElement("div");
-        front.className = "flip-card-front";
-        front.innerHTML = '<span style="font-size: 2.2rem; margin-bottom: 8px;">❓</span><div class="pixel-tag">CARD 0' + (i + 1) + '</div>';
-
-        var back = document.createElement("div");
-        back.className = "flip-card-back rarity-" + item.rarity;
-
-        var iconSpan = document.createElement("span");
-        iconSpan.style.cssText = "font-size: 2.5rem; margin-bottom: 6px;";
-        iconSpan.innerText = item.icon || "💎";
-
-        var nameDiv = document.createElement("div");
-        nameDiv.style.cssText = "font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;";
-        nameDiv.innerText = item.name;
-
-        var rarityDiv = document.createElement("div");
-        rarityDiv.className = "pixel-tag";
-        rarityDiv.innerText = (item.rarity || "").toUpperCase();
-
-        back.appendChild(iconSpan);
-        back.appendChild(nameDiv);
-        back.appendChild(rarityDiv);
-
-        inner.appendChild(front);
-        inner.appendChild(back);
-        cardEl.appendChild(inner);
-        container.appendChild(cardEl);
-      })(idx, this.generatedPicks[idx]);
-    }
+      container.appendChild(cardEl);
+    });
 
     if (modal) modal.style.display = "flex";
   },
@@ -180,20 +155,20 @@ window.AppChest = {
     if (this.selectedCardIndex !== null) return;
     this.selectedCardIndex = selectedIndex;
 
-    var chosenItem = this.generatedPicks[selectedIndex];
-    var pickedCard = document.getElementById("pick-card-" + selectedIndex);
+    const chosenItem = this.generatedPicks[selectedIndex];
+    const pickedCard = document.getElementById("pick-card-" + selectedIndex);
     if (pickedCard) pickedCard.classList.add("flipped");
 
-    setTimeout(function() {
-      for (var idx = 0; idx < 3; idx++) {
+    setTimeout(() => {
+      [0, 1, 2].forEach((idx) => {
         if (idx !== selectedIndex) {
-          var other = document.getElementById("pick-card-" + idx);
+          const other = document.getElementById("pick-card-" + idx);
           if (other) other.classList.add("flipped", "missed");
         }
-      }
+      });
     }, 300);
 
-    var rpcRes = await supabaseClient.rpc("claim_card", {
+    const rpcRes = await supabaseClient.rpc("claim_card", {
       p_user_id: AppState.user.id,
       p_template_id: chosenItem.id,
       p_cost: this.activeCrate.cost
@@ -207,7 +182,7 @@ window.AppChest = {
     AppState.profile.coins -= this.activeCrate.cost;
     if (window.AppUI && AppUI.updateHUD) AppUI.updateHUD();
 
-    var btnCollect = document.getElementById("btn-collect-loot");
+    const btnCollect = document.getElementById("btn-collect-loot");
     if (btnCollect) {
       btnCollect.innerText = "CLAIM " + chosenItem.name + " (#" + rpcRes.data.serial_number + ")";
       btnCollect.style.display = "block";
@@ -215,7 +190,7 @@ window.AppChest = {
   },
 
   collectAndClose: function() {
-    var modal = document.getElementById("modal-opening");
+    const modal = document.getElementById("modal-opening");
     if (modal) modal.style.display = "none";
     if (window.AppInventory && AppInventory.loadVault) {
       AppInventory.loadVault();
