@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cyber Crate Drop</title>
+  <title>Cyber Crate Drop // Terminal</title>
   <style>
     :root {
       --bg: #090a10;
-      --card-bg: rgba(18, 21, 35, 0.75);
+      --panel-bg: rgba(18, 21, 35, 0.85);
       --border: #232942;
       --text: #e2e8f0;
+      --muted: #94a3b8;
       --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.4);
+      --accent-glow: rgba(99, 102, 241, 0.45);
+      --neon-cyan: #38bdf8;
+      --neon-pink: #ec4899;
       --common: #94a3b8;
       --rare: #38bdf8;
       --epic: #c084fc;
@@ -26,68 +29,158 @@
     }
 
     body {
-      background: radial-gradient(circle at 50% 0%, #15192e 0%, var(--bg) 70%);
+      background: radial-gradient(circle at 50% 0%, #171b33 0%, var(--bg) 75%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 15px;
+      padding: 24px 16px;
       overflow-x: hidden;
     }
 
+    /* TOP MAIN HUD */
     header {
       width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 24px;
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
+      gap: 16px;
+      padding: 16px 24px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      margin-bottom: 35px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      margin-bottom: 24px;
     }
 
     .brand-title {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 900;
       letter-spacing: 2px;
-      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      background: linear-gradient(90deg, #6366f1, #38bdf8, #ec4899);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-
-    .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
-    .hud-coins {
-      background: rgba(0, 0, 0, 0.5);
+    .nav-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-badge {
+      background: rgba(0, 0, 0, 0.55);
       border: 1px solid #334155;
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 20px;
       font-weight: 700;
+      font-size: 0.85rem;
       color: #fbbf24;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    #chest-grid {
+    /* BUTTON SUITE */
+    .btn {
+      cursor: pointer;
+      font-weight: 800;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #475569;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #000;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-gold:hover {
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-block {
       width: 100%;
-      max-width: 900px;
+      padding: 10px 0;
+    }
+
+    /* VIEW SECTIONS */
+    .view-panel {
+      width: 100%;
+      max-width: 1000px;
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* CRATES VIEW */
+    #chest-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 20px;
     }
 
     .card {
-      background: var(--card-bg);
+      background: var(--panel-bg);
       backdrop-filter: blur(10px);
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -121,46 +214,44 @@
       opacity: 1;
     }
 
-    .btn {
-      cursor: pointer;
-      font-weight: 800;
-      border-radius: 8px;
-      border: none;
-      transition: all 0.2s ease;
-      font-size: 0.85rem;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-    }
-
-    .btn-primary:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.7);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
+    /* VAULT / INVENTORY VIEW */
+    .vault-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px 18px;
+      background: var(--panel-bg);
       border: 1px solid var(--border);
-      padding: 8px 14px;
+      border-radius: 12px;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: #475569;
+    #vault-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
     }
 
-    .btn-block {
-      width: 100%;
-      padding: 10px 0;
-      letter-spacing: 1px;
+    .vault-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .vault-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.2);
     }
 
     /* ================= OPENING MODAL ================= */
-    #modal-opening, #modal-trading {
+    #modal-opening, #modal-trading, #modal-faucet {
       display: none;
       position: fixed;
       inset: 0;
@@ -359,8 +450,8 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    /* ================= TRADING MODAL ================= */
-    .trade-modal-window {
+    /* MODAL WINDOWS */
+    .cyber-modal-window {
       background: #111422;
       border: 1px solid #334155;
       border-radius: 16px;
@@ -383,11 +474,6 @@
       outline: none;
       font-size: 0.95rem;
       margin-top: 6px;
-    }
-
-    .trade-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
     }
 
     .trade-inventory-grid {
@@ -442,25 +528,19 @@
     }
   </style>
 
-  <!-- 1. Supabase JS CDN Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 2. Supabase Client & AppState Setup -->
   <script>
-    // FILL THESE TWO VALUES WITH YOUR ACTUAL SUPABASE PROJECT CREDENTIALS:
     const SUPABASE_URL = "https://nsmljllkktkphqcpmwda.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_c8CWz4tqfppmApJxJekO_Q_lDsIci8C";
 
-    // Initialize client globally on window so every script can access it
     window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Global session state
     window.AppState = window.AppState || {
       user: null,
-      profile: { coins: 0 }
+      profile: { coins: 500 }
     };
 
-    // Keep session and profile synced
     async function syncSession() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session && session.user) {
@@ -472,11 +552,33 @@
           .single();
         if (profile) {
           AppState.profile = profile;
-          const coinEl = document.getElementById("user-coins");
-          if (coinEl) coinEl.innerText = profile.coins || 0;
         }
       }
+      updateHUD();
     }
+
+    function updateHUD() {
+      const coins = AppState.profile ? (AppState.profile.coins || 0) : 0;
+      const coinEl = document.getElementById("user-coins");
+      if (coinEl) coinEl.innerText = coins;
+    }
+
+    window.AppUI = {
+      updateHUD: updateHUD,
+      switchTab: function(tabName) {
+        document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+        document.querySelectorAll(".nav-bar .btn").forEach(b => b.classList.remove("active"));
+        
+        var panel = document.getElementById("panel-" + tabName);
+        var btn = document.getElementById("nav-btn-" + tabName);
+        if (panel) panel.classList.add("active");
+        if (btn) btn.classList.add("active");
+
+        if (tabName === "vault" && window.AppChest && AppChest.loadVault) {
+          AppChest.loadVault();
+        }
+      }
+    };
 
     document.addEventListener("DOMContentLoaded", async () => {
       await syncSession();
@@ -488,15 +590,49 @@
 </head>
 <body>
 
+  <!-- RESTORED MASTER CONTROL HEADER -->
   <header>
-    <div class="brand-title">CYBER CRATES</div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" onclick="AppChest.openTradeModal()">🔄 TRADE POST</button>
-      <div class="hud-coins" id="hud-coins">🪙 <span id="user-coins">0</span>G</div>
+    <div class="brand-title">
+      <span>⚡</span> CYBER CRATES
+    </div>
+
+    <!-- MAIN NAVIGATION BUTTONS -->
+    <nav class="nav-bar">
+      <button id="nav-btn-crates" class="btn btn-secondary active" onclick="AppUI.switchTab('crates')">
+        📦 CRATES
+      </button>
+      <button id="nav-btn-vault" class="btn btn-secondary" onclick="AppUI.switchTab('vault')">
+        🎒 VAULT
+      </button>
+      <button class="btn btn-secondary" onclick="AppChest.openTradeModal()">
+        🔄 TRADE
+      </button>
+      <button class="btn btn-gold" onclick="AppChest.claimDailyCoins()">
+        🪙 +100G FAUCET
+      </button>
+    </nav>
+
+    <!-- STATUS READOUT -->
+    <div class="hud-stats">
+      <div class="hud-badge" id="hud-coins">
+        🪙 <span id="user-coins">0</span>G
+      </div>
     </div>
   </header>
 
-  <main id="chest-grid"></main>
+  <!-- PANEL 1: CRATE STORE -->
+  <section id="panel-crates" class="view-panel active">
+    <main id="chest-grid"></main>
+  </section>
+
+  <!-- PANEL 2: INVENTORY / VAULT -->
+  <section id="panel-vault" class="view-panel">
+    <div class="vault-toolbar">
+      <h3 style="font-size: 0.95rem; letter-spacing: 1px; color: var(--neon-cyan);">VAULT STORAGE</h3>
+      <button class="btn btn-secondary" onclick="AppChest.loadVault()">REFRESH</button>
+    </div>
+    <div id="vault-grid"></div>
+  </section>
 
   <!-- PACK OPENING MODAL -->
   <div id="modal-opening">
@@ -513,50 +649,49 @@
     </button>
   </div>
 
-  <!-- PLAYER TRADING MODAL -->
+  <!-- PLAYER TRADING POST MODAL -->
   <div id="modal-trading">
-    <div class="trade-modal-window">
+    <div class="cyber-modal-window">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 16px;">
-        <h2 style="font-size: 1.1rem; letter-spacing: 1.5px; font-weight: 800;">PLAYER TRADING TERMINAL</h2>
+        <h2 style="font-size: 1.1rem; letter-spacing: 1.5px; font-weight: 800;">PLAYER TRADING POST</h2>
         <button class="btn btn-secondary" onclick="AppChest.closeTradeModal()" style="padding: 4px 10px;">✕</button>
       </div>
 
       <!-- Player Search -->
       <div>
-        <label style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px;">SEARCH OPERATIVE BY USERNAME</label>
+        <label style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px;">SEARCH PLAYER</label>
         <input type="text" id="trade-search-input" class="trade-input" placeholder="Type username..." oninput="AppChest.searchUsers(this.value)">
         <div id="trade-user-results" style="margin-top: 8px;"></div>
       </div>
 
-      <!-- Live 1v1 Trade Floor -->
+      <!-- 1v1 Trade Floor -->
       <div id="trade-stage" style="display: none; border-top: 1px solid #334155; padding-top: 16px; margin-top: 16px;">
         <h3 id="trade-target-username" style="font-size: 0.9rem; color: #38bdf8; margin-bottom: 12px; letter-spacing: 1px;"></h3>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div>
-            <span style="font-size: 0.75rem; font-weight: 800; color: #a855f7;">YOU OFFER:</span>
+            <span style="font-size: 0.75rem; font-weight: 800; color: #a855f7;">YOUR OFFER:</span>
             <div id="trade-my-items" class="trade-inventory-grid"></div>
           </div>
           <div>
-            <span style="font-size: 0.75rem; font-weight: 800; color: #38bdf8;">THEY OFFER:</span>
+            <span style="font-size: 0.75rem; font-weight: 800; color: #38bdf8;">THEIR OFFER:</span>
             <div id="trade-their-items" class="trade-inventory-grid"></div>
           </div>
         </div>
 
         <button class="btn btn-primary btn-block" style="margin-top: 16px; padding: 12px 0;" onclick="AppChest.sendTradeOffer()">
-          TRANSMIT PROPOSAL
+          SEND OFFER
         </button>
       </div>
 
-      <!-- Proposals Inbox -->
+      <!-- Active Proposals -->
       <div style="margin-top: 24px; border-top: 1px solid #334155; padding-top: 14px;">
-        <h3 style="font-size: 0.8rem; letter-spacing: 1.5px; font-weight: 800; color: #94a3b8; margin-bottom: 10px;">ACTIVE PROPOSALS</h3>
+        <h3 style="font-size: 0.8rem; letter-spacing: 1.5px; font-weight: 800; color: #94a3b8; margin-bottom: 10px;">PROPOSALS INBOX</h3>
         <div id="trade-inbox-list"></div>
       </div>
     </div>
   </div>
 
-  <!-- 3. Logic script loaded after Supabase initialization -->
   <script src="js/ChestMain.js"></script>
 </body>
 </html>
