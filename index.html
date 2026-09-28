@@ -87,6 +87,7 @@
         <button class="nav-item" onclick="AppUI.switchTab('inventory')">🎒 VAULT</button>
         <button class="nav-item" onclick="AppUI.switchTab('trades')">🔄 TRADES <span id="nav-trade-badge" class="badge-count" style="display:none;">0</span></button>
         <button class="nav-item" onclick="AppUI.switchTab('leaderboard')">👑 RANKS</button>
+        <button id="nav-admin-btn" class="nav-item" style="display: none;" onclick="AppUI.switchTab('admin')">⚙️ DEV TOOLS</button>
       </nav>
 
       <div class="user-stats">
@@ -119,6 +120,62 @@
           <!-- Dynamically populated by inventory.js -->
         </div>
       </section>
+
+      <!-- TAB: ADMIN CREATOR -->
+<div id="tab-admin" class="tab-pane">
+  <div class="card" style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px;">
+    
+    <!-- 1. CREATE A CRATE -->
+    <div>
+      <h3 style="border-bottom: 2px solid var(--border-color, #333); padding-bottom: 8px; margin-bottom: 16px;">
+        📦 1. REGISTER NEW CRATE
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <input type="text" id="admin-crate-name" placeholder="Crate Name (e.g. Cyber Stash)" class="form-input">
+        <input type="number" id="admin-crate-cost" placeholder="Cost (Gold, e.g. 350)" class="form-input">
+        <input type="text" id="admin-crate-icon" placeholder="Emoji Icon (e.g. 💾)" class="form-input" style="max-width: 140px;">
+      </div>
+      <input type="text" id="admin-crate-desc" placeholder="Brief Description..." class="form-input" style="width: 100%; margin-top: 10px; box-sizing: border-box;">
+      <button class="btn btn-primary" style="margin-top: 12px;" onclick="AppAdmin.createCrate()">+ ADD CRATE TO STORE</button>
+    </div>
+
+    <!-- 2. CREATE AN ITEM -->
+    <div>
+      <h3 style="border-bottom: 2px solid var(--border-color, #333); padding-bottom: 8px; margin-bottom: 16px;">
+        🃏 2. ADD ITEM TO CRATE
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <select id="admin-item-crate-select" class="form-input">
+          <option value="">-- Choose Target Crate --</option>
+        </select>
+        <input type="text" id="admin-item-name" placeholder="Item Name (e.g. Golden Keycard)" class="form-input">
+        <input type="text" id="admin-item-icon" placeholder="Emoji Icon (e.g. 🔑)" class="form-input" style="max-width: 140px;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+        <div>
+          <label style="font-size: 0.75rem; color: #888; display: block; margin-bottom: 4px;">RARITY</label>
+          <select id="admin-item-rarity" class="form-input" style="width: 100%;">
+            <option value="common">Common</option>
+            <option value="uncommon">Uncommon</option>
+            <option value="rare">Rare</option>
+            <option value="epic">Epic</option>
+            <option value="mythic">Mythic</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; color: #888; display: block; margin-bottom: 4px;">BASE VALUE (GOLD)</label>
+          <input type="number" id="admin-item-value" placeholder="e.g. 200" class="form-input" style="width: 100%; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top: 16px;" onclick="AppAdmin.createItem()">+ MINT ITEM INTO POOL</button>
+    </div>
+
+    <div id="admin-feedback" style="font-family: monospace; font-size: 0.85rem;"></div>
+
+  </div>
+</div>
 
       <!-- TAB 3: TRADES -->
       <section id="tab-trades" class="tab-pane">
