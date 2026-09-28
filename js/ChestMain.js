@@ -6,6 +6,11 @@ window.AppChest = {
   generatedPicks: [],
   activeCrate: null,
 
+  // Trading State Variables
+  selectedTradeUser: null,
+  mySelectedTradeItem: null,
+  theirSelectedTradeItem: null,
+
   // Built-in Synthesizer for pack opening sounds (No audio files needed)
   playSound: function(type) {
     try {
@@ -214,21 +219,18 @@ window.AppChest = {
     var modal = document.getElementById("modal-opening");
     var rays = document.getElementById("god-rays");
 
-    // 1. Audio and Visual Impact Hit
     var isLegendary = (chosenItem.rarity || "").toLowerCase() === "legendary";
     this.playSound(isLegendary ? "legendary" : "card-flip");
 
     if (rays) rays.classList.add("active");
     if (modal) {
       modal.classList.remove("shake-impact");
-      void modal.offsetWidth; // Trigger reflow for fresh animation
+      void modal.offsetWidth;
       modal.classList.add("shake-impact");
     }
 
-    // 2. Flip the chosen card
     if (pickedCard) pickedCard.classList.add("flipped");
 
-    // 3. Stagger-reveal remaining missed cards
     setTimeout(function() {
       for (var idx = 0; idx < 3; idx++) {
         if (idx !== selectedIndex) {
@@ -238,7 +240,6 @@ window.AppChest = {
       }
     }, 450);
 
-    // 4. Supabase Transaction
     var rpcRes = await supabaseClient.rpc("claim_card", {
       p_user_id: AppState.user.id,
       p_template_id: chosenItem.id,
@@ -255,7 +256,6 @@ window.AppChest = {
     if (coinDisplay) coinDisplay.innerText = AppState.profile.coins;
     if (window.AppUI && AppUI.updateHUD) AppUI.updateHUD();
 
-    // 5. Present the Claim Button
     var btnCollect = document.getElementById("btn-collect-loot");
     if (btnCollect) {
       btnCollect.innerText = "COLLECT " + chosenItem.name.toUpperCase() + " (#" + rpcRes.data.serial_number + ")";
@@ -269,5 +269,219 @@ window.AppChest = {
     if (window.AppInventory && AppInventory.loadVault) {
       AppInventory.loadVault();
     }
+  },
+
+  // ================= INTEGRATED TRADING POST LOGIC =================
+
+  openTradeModal: function() {
+    var modal = document.getElementById("modal-trading");
+    if (modal) modal.style.display = "flex";
+    this.loadPendingTrades();
+  },
+
+  closeTradeModal: function() {
+    var modal = document.getElementById("modal-trading");
+    if (modal) modal.style.display = "none";
+  },
+
+  searchUsers: async function(query) {
+    var resultsEl = document.getElementById("trade-user-results");
+    if (!resultsEl) return;
+
+    if (!query || query.trim().length < 2) {
+      resultsEl.innerHTML = "";
+      return;
+    }
+
+    resultsEl.innerHTML = "<p style='color:#64748b; font-size:0.8rem;'>> LOCATING AGENT...</p>";
+
+    var res = await supabaseClient
+      .from("profiles")
+      .select("id, username")
+      .neq("id", AppState.user.id)
+      .ilike("username", "%" + query.trim() + "%")
+      .limit(4);
+
+    if (res.error) {
+      resultsEl.innerHTML = "<p style='color:#ef4444; font-size:0.8rem;'>Error: " + res.error.message + "</p>";
+      return;
+    }
+
+    if (!res.data || res.data.length === 0) {
+      resultsEl.innerHTML = "<p style='color:#64748b; font-size:0.8rem;'>> NO OPERATIVE FOUND.</p>";
+      return;
+    }
+
+    resultsEl.innerHTML = "";
+    res.data.forEach(function(u) {
+      var btn = document.createElement("button");
+      btn.className = "btn btn-secondary";
+      btn.style.cssText = "width: 100%; margin-top: 4px; text-align: left; padding: 8px 12px; font-size: 0.85rem;";
+      btn.innerText = "🎮 " + u.username;
+      btn.onclick = function() {
+        AppChest.selectTradeTarget(u);
+      };
+      resultsEl.appendChild(btn);
+    });
+  },
+
+  selectTradeTarget: async function(user) {
+    this.selectedTradeUser = user;
+    this.mySelectedTradeItem = null;
+    this.theirSelectedTradeItem = null;
+
+    var header = document.getElementById("trade-target-username");
+    if (header) header.innerText = "UPLINK ESTABLISHED WITH: " + user.username.toUpperCase();
+
+    var stage = document.getElementById("trade-stage");
+    if (stage) stage.style.display = "block";
+
+    await Promise.all([
+      this.loadTradeVault("trade-my-items", AppState.user.id, true),
+      this.loadTradeVault("trade-their-items", user.id, false)
+    ]);
+  },
+
+  loadTradeVault: async function(elementId, userId, isSelf) {
+    var container = document.getElementById(elementId);
+    if (!container) return;
+    container.innerHTML = "<p style='font-size:0.75rem; color:#64748b; grid-column: 1/-1;'>Accessing vault...</p>";
+
+    var res = await supabaseClient
+      .from("user_inventory")
+      .select("id, item_templates (name, rarity, icon)")
+      .eq("user_id", userId);
+
+    if (res.error || !res.data || res.data.length === 0) {
+      container.innerHTML = "<p style='font-size:0.75rem; color:#64748b; grid-column: 1/-1;'>Vault empty.</p>";
+      return;
+    }
+
+    container.innerHTML = "";
+    res.data.forEach(function(row) {
+      var item = row.item_templates;
+      var el = document.createElement("div");
+      el.className = "trade-slot-card";
+      el.innerHTML = "<span style='font-size:1.4rem;'>" + (item.icon || "💎") + "</span><span style='margin-top:4px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;'>" + item.name + "</span>";
+
+      el.onclick = function() {
+        document.querySelectorAll("#" + elementId + " .trade-slot-card").forEach(function(c) {
+          c.classList.remove("selected");
+        });
+        el.classList.add("selected");
+        if (isSelf) {
+          AppChest.mySelectedTradeItem = row.id;
+        } else {
+          AppChest.theirSelectedTradeItem = row.id;
+        }
+      };
+
+      container.appendChild(el);
+    });
+  },
+
+  sendTradeOffer: async function() {
+    if (!this.selectedTradeUser) return alert("Select an operative first.");
+    if (!this.mySelectedTradeItem) return alert("Select an item from your vault to offer.");
+    if (!this.theirSelectedTradeItem) return alert("Select an item from their vault to request.");
+
+    var res = await supabaseClient
+      .from("trades")
+      .insert({
+        sender_id: AppState.user.id,
+        receiver_id: this.selectedTradeUser.id,
+        sender_item_id: this.mySelectedTradeItem,
+        receiver_item_id: this.theirSelectedTradeItem,
+        status: "pending"
+      });
+
+    if (res.error) {
+      alert("Proposal transmission failed: " + res.error.message);
+      return;
+    }
+
+    alert("Trade proposal dispatched to " + this.selectedTradeUser.username + "!");
+    this.closeTradeModal();
+  },
+
+  loadPendingTrades: async function() {
+    var inbox = document.getElementById("trade-inbox-list");
+    if (!inbox) return;
+
+    var res = await supabaseClient
+      .from("trades")
+      .select("id, status, sender_id, receiver_id, created_at")
+      .or("sender_id.eq." + AppState.user.id + ",receiver_id.eq." + AppState.user.id)
+      .eq("status", "pending");
+
+    if (res.error || !res.data || res.data.length === 0) {
+      inbox.innerHTML = "<p style='color:#64748b; font-size:0.75rem;'>No pending transmissions.</p>";
+      return;
+    }
+
+    inbox.innerHTML = "";
+    res.data.forEach(function(t) {
+      var isIncoming = t.receiver_id === AppState.user.id;
+      var card = document.createElement("div");
+      card.className = "trade-inbox-card";
+      card.innerHTML = "<div><span style='font-size:0.8rem; font-weight:800; color:" + (isIncoming ? "#38bdf8" : "#fbbf24") + ";'>" + (isIncoming ? "INCOMING PROPOSAL" : "OUTGOING PROPOSAL") + "</span></div>";
+
+      var actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.gap = "8px";
+
+      if (isIncoming) {
+        var btnAccept = document.createElement("button");
+        btnAccept.className = "btn btn-primary";
+        btnAccept.style.padding = "6px 14px";
+        btnAccept.innerText = "Accept";
+        btnAccept.onclick = function() { AppChest.acceptTrade(t.id); };
+
+        var btnDecline = document.createElement("button");
+        btnDecline.className = "btn btn-secondary";
+        btnDecline.style.padding = "6px 14px";
+        btnDecline.innerText = "Decline";
+        btnDecline.onclick = function() { AppChest.updateTradeStatus(t.id, "declined"); };
+
+        actions.appendChild(btnAccept);
+        actions.appendChild(btnDecline);
+      } else {
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "btn btn-secondary";
+        btnCancel.style.padding = "6px 14px";
+        btnCancel.innerText = "Withdraw";
+        btnCancel.onclick = function() { AppChest.updateTradeStatus(t.id, "canceled"); };
+        actions.appendChild(btnCancel);
+      }
+
+      card.appendChild(actions);
+      inbox.appendChild(card);
+    });
+  },
+
+  acceptTrade: async function(tradeId) {
+    var res = await supabaseClient.rpc("execute_trade", { p_trade_id: tradeId });
+    if (res.error) {
+      alert("Exchange failed: " + res.error.message);
+      return;
+    }
+
+    alert("Exchange confirmed! Items reallocated in your vault.");
+    if (window.AppInventory && AppInventory.loadVault) AppInventory.loadVault();
+    this.loadPendingTrades();
+  },
+
+  updateTradeStatus: async function(tradeId, newStatus) {
+    var res = await supabaseClient
+      .from("trades")
+      .update({ status: newStatus })
+      .eq("id", tradeId);
+
+    if (res.error) {
+      alert("Error: " + res.error.message);
+      return;
+    }
+
+    this.loadPendingTrades();
   }
 };
