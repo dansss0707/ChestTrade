@@ -23,6 +23,8 @@
   --pixel-shadow-sm: 3px 3px 0px #000000;
 }
 
+
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -223,6 +225,36 @@ body {
   cursor: pointer;
   letter-spacing: 0px;
   transition: all 0.05s ease;
+}
+
+/* Responsive crate catalog grid */
+#chest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 20px auto 40px auto;
+  box-sizing: border-box;
+}
+
+/* Individual crate cards */
+#chest-grid .card {
+  background: var(--bg-card, #1a1a24);
+  border: 2px solid var(--border-color, #333344);
+  border-radius: 8px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+#chest-grid .card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent, #f59e0b);
 }
 
 .btn:active {
