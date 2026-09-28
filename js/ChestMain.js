@@ -1,4 +1,4 @@
-// js/chest.js
+// js/ChestMain.js
 
 window.AppChest = {
   crates: [],
@@ -31,15 +31,7 @@ window.AppChest = {
         return;
       }
 
-     grid.innerHTML = "";
-
-      this.crates.forEach(function(c) {
-        var card = document.createElement("div");
-        card.className = "card";
-
-        var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
-
-        grid.innerHTML = "";
+      grid.innerHTML = "";
 
       this.crates.forEach(function(c) {
         var card = document.createElement("div");
@@ -48,16 +40,14 @@ window.AppChest = {
         var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
 
         card.innerHTML =
-  '<div style="margin: 0 auto; display: flex; justify-content: center; align-items: center; width: 64px; height: 64px; overflow: hidden;">' +
-    '<img src="' + imgSrc + '" alt="' + c.name + '" ' +
-      'style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; transform: scale(0.7) !important; object-fit: contain; image-rendering: pixelated; margin: 0; display: block;" ' +
-      'onerror="this.onerror=null; this.src=\'chest.png\';">' +
-  '</div>' +
-  '<h3 style="margin: 6px 0; font-size: 0.9rem; text-transform: uppercase;">' + c.name + '</h3>' +
-  '<p style="font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
-  '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
-    'OPEN [' + c.cost + 'G]' +
-  '</button>';
+          '<div style="margin: 6px auto; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; overflow: hidden;">' +
+            '<img src="' + imgSrc + '" alt="' + c.name + '" width="40" height="40" style="width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; max-width: 40px !important; max-height: 40px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;" onerror="this.onerror=null; this.src=\'chest.png\';">' +
+          '</div>' +
+          '<h3 style="margin: 6px 0; font-size: 0.95rem; text-transform: uppercase;">' + c.name + '</h3>' +
+          '<p style="font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
+          '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
+            'OPEN [' + c.cost + 'G]' +
+          '</button>';
 
         grid.appendChild(card);
       });
