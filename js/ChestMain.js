@@ -39,14 +39,22 @@ window.AppChest = {
 
         var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
 
+        grid.innerHTML = "";
+
+      this.crates.forEach(function(c) {
+        var card = document.createElement("div");
+        card.className = "card";
+
+        var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
+
         card.innerHTML =
-          '<div style="margin: 8px 0; display: flex; justify-content: center; align-items: center; height: 110px;">' +
+          '<div style="margin: 4px 0; display: flex; justify-content: center; align-items: center; height: 60px;">' +
             '<img src="' + imgSrc + '" alt="' + c.name + '" ' +
-              'style="width: 100px !important; height: 100px !important; max-width: 100px !important; max-height: 100px !important; object-fit: contain; image-rendering: pixelated; transform: none !important; margin: 0 auto; display: block;" ' +
+              'style="width: 48px !important; height: 48px !important; max-width: 48px !important; max-height: 48px !important; object-fit: contain !important; image-rendering: pixelated; transform: scale(1) !important; margin: 0 auto; display: block;" ' +
               'onerror="this.onerror=null; this.src=\'chest.png\';">' +
           '</div>' +
-          '<h3 style="margin: 6px 0; font-size: 1.1rem; text-transform: uppercase;">' + c.name + '</h3>' +
-          '<p style="font-size: 0.8rem; color: #888; margin-bottom: 16px; flex-grow: 1;">' + (c.description || "") + '</p>' +
+          '<h3 style="margin: 6px 0; font-size: 1rem; text-transform: uppercase;">' + c.name + '</h3>' +
+          '<p style="font-size: 0.8rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
           '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
             'OPEN [' + c.cost + 'G]' +
           '</button>';
