@@ -526,15 +526,21 @@ input:focus {
   color: #000;
 }
 
+#chest-grid .card div:has(img) {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  margin: 0 auto 10px auto !important;
+  overflow: hidden !important;
+}
+
 #chest-grid .card img {
-  width: 40px !important;
-  height: 40px !important;
-  max-width: 40px !important;
-  max-height: 40px !important;
-  object-fit: contain !important;
-  image-rendering: pixelated !important;
-  transform: none !important;
-  margin: 10px auto !important;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  transform: scale(0.7) !important;
+  margin: 0 auto !important;
   display: block !important;
-  filter: drop-shadow(0 4px 0px #000000);
 }
