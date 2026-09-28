@@ -1,9 +1,7 @@
-// js/auth.js
-
-const AppAuth = {
+window.AppAuth = {
   togglePasswordVisibility: function() {
-    const passInput = document.getElementById("auth-password");
-    const peekBtn = document.getElementById("btn-peek-password");
+    var passInput = document.getElementById("auth-password");
+    var peekBtn = document.getElementById("btn-peek-password");
     if (!passInput || !peekBtn) return;
 
     if (passInput.type === "password") {
@@ -16,19 +14,19 @@ const AppAuth = {
   },
 
   setError: function(msg) {
-    const errEl = document.getElementById("auth-error");
+    var errEl = document.getElementById("auth-error");
     if (errEl) errEl.innerText = msg || "";
   },
 
   formatInternalEmail: function(username) {
-    const cleanUser = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    var cleanUser = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
     return cleanUser + "@chestsim.internal";
   },
 
   register: async function() {
     this.setError("");
-    const userInput = document.getElementById("auth-username").value.trim();
-    const passInput = document.getElementById("auth-password").value;
+    var userInput = document.getElementById("auth-username").value.trim();
+    var passInput = document.getElementById("auth-password").value;
 
     if (userInput.length < 3 || userInput.length > 15) {
       this.setError("Username must be 3-15 characters.");
@@ -43,29 +41,29 @@ const AppAuth = {
       return;
     }
 
-    const dummyEmail = this.formatInternalEmail(userInput);
+    var dummyEmail = this.formatInternalEmail(userInput);
 
     try {
-      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      var authResult = await supabaseClient.auth.signUp({
         email: dummyEmail,
-        password: passInput,
+        password: passInput
       });
 
-      if (authError) throw authError;
+      if (authResult.error) throw authResult.error;
 
-      const { error: profileError } = await supabaseClient
+      var profileResult = await supabaseClient
         .from("profiles")
         .insert([
           {
-            id: authData.user.id,
+            id: authResult.data.user.id,
             username: userInput,
             coins: 500,
             items_recycled: 0,
-            net_worth: 500,
+            net_worth: 500
           }
         ]);
 
-      if (profileError) throw profileError;
+      if (profileResult.error) throw profileResult.error;
 
       await this.login();
     } catch (err) {
@@ -75,34 +73,34 @@ const AppAuth = {
 
   login: async function() {
     this.setError("");
-    const userInput = document.getElementById("auth-username").value.trim();
-    const passInput = document.getElementById("auth-password").value;
+    var userInput = document.getElementById("auth-username").value.trim();
+    var passInput = document.getElementById("auth-password").value;
 
     if (!userInput || !passInput) {
       this.setError("Enter ID and Passkey.");
       return;
     }
 
-    const dummyEmail = this.formatInternalEmail(userInput);
+    var dummyEmail = this.formatInternalEmail(userInput);
 
     try {
-      const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+      var authResult = await supabaseClient.auth.signInWithPassword({
         email: dummyEmail,
-        password: passInput,
+        password: passInput
       });
 
-      if (authError) throw authError;
+      if (authResult.error) throw authResult.error;
 
-      const { data: profile, error: profileError } = await supabaseClient
+      var profileQuery = await supabaseClient
         .from("profiles")
         .select("*")
-        .eq("id", authData.user.id)
+        .eq("id", authResult.data.user.id)
         .single();
 
-      if (profileError || !profile) throw new Error("Could not load player profile.");
+      if (profileQuery.error || !profileQuery.data) throw new Error("Could not load player profile.");
 
-      AppState.user = authData.user;
-      AppState.profile = profile;
+      AppState.user = authResult.data.user;
+      AppState.profile = profileQuery.data;
 
       document.getElementById("view-auth").style.display = "none";
       document.getElementById("app-shell").style.display = "block";
