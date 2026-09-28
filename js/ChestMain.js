@@ -31,18 +31,18 @@ window.AppChest = {
         return;
       }
 
-      grid.innerHTML = "";
+     grid.innerHTML = "";
 
       this.crates.forEach(function(c) {
         var card = document.createElement("div");
         card.className = "card";
 
-        // Defaults to chest.png in root
-        var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
+        // Determine if it's an image file or fallback to chest.png
+        var imagePath = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
 
         card.innerHTML =
           '<div style="margin: 10px 0; display: flex; justify-content: center; align-items: center; min-height: 80px;">' +
-            '<img src="' + imgSrc + '" alt="' + c.name + '" style="max-width: 80px; max-height: 80px; object-fit: contain; image-rendering: pixelated;" onerror="this.onerror=null; this.src=\'chest.png\';">' +
+            '<img src="' + imagePath + '" alt="' + c.name + '" style="width: 72px; height: 72px; object-fit: contain; image-rendering: pixelated;" onerror="this.onerror=null; this.src=\'chest.png\';">' +
           '</div>' +
           '<h3 style="margin: 6px 0; font-size: 1.1rem; text-transform: uppercase;">' + c.name + '</h3>' +
           '<p style="font-size: 0.8rem; color: #888; margin-bottom: 16px; flex-grow: 1;">' + (c.description || "") + '</p>' +
