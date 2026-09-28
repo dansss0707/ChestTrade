@@ -1,546 +1,372 @@
-/* ==========================================================================
-   1. PIXEL INDIE THEME & RETRO RESET
-   ========================================================================== */
-:root {
-  --bg-deep: #0c0d12;
-  --bg-panel: #161720;
-  --bg-elevated: #222433;
-  --pixel-border: 3px solid #000000;
-  
-  --text-pixel: #ffffff;
-  --text-dim: #7f85a3;
-  
-  /* Retro Arcade Palette */
-  --pixel-yellow: #facc15;
-  --pixel-green: #22c55e;
-  --pixel-cyan: #06b6d4;
-  --pixel-pink: #ec4899;
-  --pixel-red: #ef4444;
-  --pixel-purple: #a855f7;
-  
-  /* Hard Pixel Shadows */
-  --pixel-shadow-lg: 5px 5px 0px #000000;
-  --pixel-shadow-sm: 3px 3px 0px #000000;
-}
-
-
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  image-rendering: pixelated;
-  user-select: none;
-}
-
-body {
-  background-color: var(--bg-deep);
-  color: var(--text-pixel);
-  font-family: 'Space Mono', monospace;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  /* Retro scanline grid */
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Titles and Headers use the 8-Bit Font */
-.pixel-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 1.4rem;
-  color: var(--pixel-yellow);
-  text-shadow: 3px 3px 0px #000;
-  letter-spacing: -1px;
-  margin: 12px 0 6px 0;
-}
-
-.pixel-subheading {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.95rem;
-  color: var(--text-pixel);
-  letter-spacing: 0px;
-  line-height: 1.5;
-}
-
-.pixel-tag {
-  display: inline-block;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
-  background-color: #000;
-  color: var(--pixel-cyan);
-  padding: 4px 8px;
-  border: 2px solid var(--pixel-cyan);
-}
-
-.subtitle {
-  color: var(--text-dim);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-/* ==========================================================================
-   2. TOPBAR & PIXEL HUD
-   ========================================================================== */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--bg-panel);
-  border-bottom: var(--pixel-border);
-  box-shadow: 0 4px 0 #000000;
-  padding: 12px 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-text {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.9rem;
-  color: var(--pixel-yellow);
-  text-shadow: 2px 2px 0 #000;
-}
-
-.logo-pixel {
-  width: 14px;
-  height: 14px;
-  background-color: var(--pixel-yellow);
-  border: 2px solid #000;
-  box-shadow: 2px 2px 0 #000;
-}
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-}
-
-.nav-item {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  background-color: var(--bg-elevated);
-  border: var(--pixel-border);
-  box-shadow: var(--pixel-shadow-sm);
-  color: var(--text-dim);
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: all 0.05s ease;
-}
-
-.nav-item:hover {
-  color: var(--text-pixel);
-  background-color: #2b2e40;
-}
-
-.nav-item.active {
-  background-color: var(--pixel-yellow);
-  color: #000000;
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px #000;
-}
-
-.badge-count {
-  background-color: var(--pixel-red);
-  color: #fff;
-  font-size: 0.55rem;
-  padding: 2px 5px;
-  border: 1px solid #000;
-  margin-left: 4px;
-}
-
-.user-stats {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.stat-pill {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  background-color: #000;
-  padding: 8px 12px;
-  border: 2px solid #33364d;
-  color: var(--pixel-yellow);
-}
-
-.user-pill {
-  color: var(--pixel-cyan);
-  border-color: var(--pixel-cyan);
-}
-
-/* ==========================================================================
-   3. RETRO CARDS & LAYOUT
-   ========================================================================== */
-.content-container {
-  max-width: 1050px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 24px;
-  flex: 1;
-}
-
-.tab-pane { display: none; }
-.tab-pane.active { display: block; }
-
-.section-header {
-  margin-bottom: 20px;
-}
-
-.section-header h2 {
-  margin-bottom: 6px;
-}
-
-.grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
-}
-
-.card {
-  background-color: var(--bg-panel);
-  border: var(--pixel-border);
-  box-shadow: var(--pixel-shadow-lg);
-  padding: 20px;
-}
-
-/* ==========================================================================
-   4. TACTILE PIXEL BUTTONS & INPUTS
-   ========================================================================== */
-.btn {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  padding: 12px 14px;
-  border: var(--pixel-border);
-  box-shadow: var(--pixel-shadow-sm);
-  cursor: pointer;
-  letter-spacing: 0px;
-  transition: all 0.05s ease;
-}
-
-/* Responsive crate catalog grid */
-#chest-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1100px;
-  margin: 20px auto 40px auto;
-  box-sizing: border-box;
-}
-
-/* Individual crate cards */
-/* Chest Sprite Sizing */
-#chest-grid .card img {
-  width: 128px;
-  height: 128px;
-  min-width: 128px;
-  min-height: 128px;
-  max-width: 128px;
-  max-height: 128px;
-  object-fit: contain;
-  image-rendering: pixelated;
-  margin: 12px auto;
-  display: block;
-  filter: drop-shadow(0 6px 0px #000000);
-}
-
-#chest-grid .card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent, #f59e0b);
-}
-
-.btn:active {
-  transform: translate(3px, 3px);
-  box-shadow: none;
-}
-
-.btn-primary {
-  background-color: var(--pixel-yellow);
-  color: #000;
-}
-
-.btn-primary:hover {
-  background-color: #ffd84d;
-}
-
-.btn-secondary {
-  background-color: var(--bg-elevated);
-  color: var(--text-pixel);
-}
-
-.btn-secondary:hover {
-  background-color: #2b2e40;
-}
-
-.btn-danger {
-  background-color: var(--pixel-red);
-  color: #fff;
-}
-
-.btn-sm {
-  padding: 6px 8px;
-  font-size: 0.55rem;
-}
-
-.btn-block {
-  width: 100%;
-  padding: 14px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-  text-align: left;
-}
-
-.input-group label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
-  color: var(--text-dim);
-}
-
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-wrapper input {
-  width: 100%;
-  padding-right: 48px;
-}
-
-.btn-peek {
-  position: absolute;
-  right: 6px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 6px;
-  opacity: 0.7;
-}
-
-.btn-peek:hover {
-  opacity: 1;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="number"] {
-  background-color: #000;
-  border: 2px solid #3d4259;
-  color: var(--text-pixel);
-  font-family: 'Space Mono', monospace;
-  font-size: 0.95rem;
-  font-weight: 700;
-  padding: 10px 12px;
-  outline: none;
-}
-
-input:focus {
-  border-color: var(--pixel-yellow);
-}
-
-/* ==========================================================================
-   5. AUTH MODAL (INDIE PIXEL)
-   ========================================================================== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(6, 7, 10, 0.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.auth-box {
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-.btn-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.btn-group .btn {
-  flex: 1;
-}
-
-.status-msg {
-  margin-top: 14px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
-  line-height: 1.5;
-}
-
-.status-msg.danger {
-  color: var(--pixel-red);
-}
-
-.briefing-box {
-  width: 100%;
-  max-width: 520px;
-  max-height: 80vh;
-}
-
-.briefing-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.briefing-feed {
-  background-color: #000;
-  border: 2px solid #292c3d;
-  padding: 12px;
-  font-size: 0.8rem;
-  margin: 10px 0 16px 0;
-}
-
-.divider {
-  border: 0;
-  border-top: 2px dashed #292c3d;
-  margin: 14px 0;
-}
-
-/* ==========================================================================
-   6. 3-CARD OPENING STAGE (PIXEL RETRO)
-   ========================================================================== */
-.opening-stage {
-  width: 100%;
-  max-width: 740px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.cards-stage {
-  display: flex;
-  justify-content: center;
-  gap: 22px;
-  margin: 28px 0;
-  perspective: 1000px;
-}
-
-.flip-card {
-  background-color: transparent;
-  width: 175px;
-  height: 250px;
-  cursor: pointer;
-}
-
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.4s steps(6); /* Snappy pixelated card flip */
-  transform-style: preserve-3d;
-}
-
-.flip-card.flipped .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front, .flip-card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  border: var(--pixel-border);
-  box-shadow: var(--pixel-shadow-lg);
-}
-
-.flip-card-front {
-  background: var(--bg-elevated);
-  color: var(--text-dim);
-}
-
-.flip-card-front:hover {
-  transform: translateY(-4px);
-  background-color: #2b2e40;
-}
-
-.flip-card-back {
-  background: var(--bg-panel);
-  transform: rotateY(180deg);
-}
-
-/* Rarity Borders */
-.rarity-common   { border-color: #9ca3af; }
-.rarity-uncommon { border-color: var(--pixel-green); }
-.rarity-rare     { border-color: var(--pixel-cyan); }
-.rarity-epic     { border-color: var(--pixel-purple); }
-.rarity-mythic   { border-color: var(--pixel-yellow); box-shadow: 0 0 18px rgba(250, 204, 21, 0.4); }
-
-.flip-card.missed {
-  opacity: 0.3;
-  filter: grayscale(100%);
-}
-
-/* ==========================================================================
-   7. TRADING SUBNAV
-   ========================================================================== */
-.trade-subnav {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.subnav-btn {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
-  background-color: var(--bg-elevated);
-  border: var(--pixel-border);
-  color: var(--text-dim);
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.subnav-btn.active {
-  background-color: var(--text-pixel);
-  color: #000;
-}
-
-#chest-grid .card div:has(img) {
-  width: 64px !important;
-  height: 64px !important;
-  max-width: 64px !important;
-  max-height: 64px !important;
-  margin: 0 auto 10px auto !important;
-  overflow: hidden !important;
-}
-
-#chest-grid .card img {
-  width: 36px !important;
-  height: 36px !important;
-  max-width: 36px !important;
-  max-height: 36px !important;
-  transform: scale(0.7) !important;
-  margin: 0 auto !important;
-  display: block !important;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Crate Drop</title>
+  <style>
+    :root {
+      --bg: #090a10;
+      --card-bg: rgba(18, 21, 35, 0.75);
+      --border: #232942;
+      --text: #e2e8f0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --common: #94a3b8;
+      --rare: #38bdf8;
+      --epic: #c084fc;
+      --legendary: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #15192e 0%, var(--bg) 70%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 15px;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 35px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hud-coins {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #chest-grid {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: #4f46e5;
+      box-shadow: 0 12px 35px var(--accent-glow);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-weight: 800;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.7);
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 10px 0;
+      letter-spacing: 1px;
+    }
+
+    /* ================= DOPAMINE MODAL OVERHAUL ================= */
+    #modal-opening {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 5, 10, 0.92);
+      backdrop-filter: blur(14px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      perspective: 1200px;
+    }
+
+    @keyframes screen-shake {
+      0% { transform: scale(1) translate(0, 0); }
+      15% { transform: scale(1.02) translate(-6px, 4px); }
+      30% { transform: scale(1.02) translate(6px, -4px); }
+      45% { transform: scale(1.01) translate(-4px, 2px); }
+      60% { transform: scale(1.005) translate(3px, -2px); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+
+    .shake-impact {
+      animation: screen-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    .god-rays {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 900px;
+      height: 900px;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 255, 255, 0.08) 0deg 12deg,
+        transparent 12deg 24deg
+      );
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(0deg);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: 1;
+    }
+
+    .god-rays.active {
+      opacity: 1;
+      animation: ray-spin 20s linear infinite;
+    }
+
+    @keyframes ray-spin {
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    #cards-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      z-index: 2;
+      padding: 30px 10px;
+    }
+
+    .flip-card {
+      width: 170px;
+      height: 250px;
+      cursor: pointer;
+      perspective: 1200px;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .flip-card:hover:not(.flipped) {
+      transform: translateY(-10px) scale(1.06);
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card.missed {
+      opacity: 0.35;
+      filter: grayscale(70%);
+      transform: scale(0.92);
+      pointer-events: none;
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .flip-card-front {
+      background: radial-gradient(circle at 50% 25%, #242940, #0d1017);
+      border: 2px solid #334155;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    .mystery-icon {
+      font-size: 3rem;
+      animation: pulse-gem 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulse-gem {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4)); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)); }
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+      background: #10121d;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Holographic rainbow sweep across card face */
+    .flip-card-back::after {
+      content: "";
+      position: absolute;
+      inset: -150%;
+      background: linear-gradient(
+        115deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.15) 38%,
+        rgba(255, 255, 255, 0.5) 45%,
+        rgba(255, 255, 255, 0.15) 52%,
+        transparent 70%
+      );
+      transform: rotate(30deg);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .flip-card.flipped .flip-card-back::after {
+      animation: holo-pass 1.3s cubic-bezier(0.19, 1, 0.22, 1) 0.3s forwards;
+    }
+
+    @keyframes holo-pass {
+      0% { transform: translateY(-70%) rotate(30deg); opacity: 0; }
+      25% { opacity: 0.9; }
+      100% { transform: translateY(70%) rotate(30deg); opacity: 0; }
+    }
+
+    .rarity-common {
+      border: 2px solid var(--common);
+      box-shadow: 0 0 15px rgba(148, 163, 184, 0.4);
+    }
+
+    .rarity-rare {
+      border: 2px solid var(--rare);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.65), inset 0 0 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .rarity-epic {
+      border: 2px solid var(--epic);
+      box-shadow: 0 0 35px rgba(192, 132, 252, 0.8), inset 0 0 15px rgba(192, 132, 252, 0.4);
+      animation: pulse-epic 1.8s infinite alternate;
+    }
+
+    .rarity-legendary {
+      border: 2px solid var(--legendary);
+      box-shadow: 0 0 45px rgba(251, 191, 36, 0.95), inset 0 0 20px rgba(251, 191, 36, 0.5);
+      animation: pulse-legendary 1.4s infinite alternate;
+    }
+
+    @keyframes pulse-epic {
+      from { box-shadow: 0 0 25px rgba(192, 132, 252, 0.6); }
+      to { box-shadow: 0 0 40px rgba(192, 132, 252, 1); }
+    }
+
+    @keyframes pulse-legendary {
+      0% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.7), 0 0 10px #fff; }
+      100% { box-shadow: 0 0 60px rgba(251, 191, 36, 1), 0 0 25px #ff5500; }
+    }
+
+    .pixel-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">CYBER CRATES</div>
+    <div class="hud-coins" id="hud-coins">🪙 <span id="user-coins">0</span>G</div>
+  </header>
+
+  <main id="chest-grid"></main>
+
+  <!-- PACK OPENING STAGE MODAL -->
+  <div id="modal-opening">
+    <div id="god-rays" class="god-rays"></div>
+
+    <h2 id="opening-chest-name" style="font-size: 1.4rem; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 20px; z-index: 2; text-shadow: 0 0 15px rgba(255,255,255,0.4);">
+      SELECT YOUR CARD
+    </h2>
+
+    <div id="cards-container"></div>
+
+    <button id="btn-collect-loot" class="btn btn-primary" style="display: none; margin-top: 25px; z-index: 2; font-size: 1rem; padding: 12px 30px; letter-spacing: 1.5px;" onclick="AppChest.collectAndClose()">
+      CLAIM ITEM
+    </button>
+  </div>
+
+  <script src="js/ChestMain.js"></script>
+</body>
+</html>
