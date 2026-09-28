@@ -15,6 +15,51 @@
 </head>
 <body>
 
+  <!-- Trading Modal -->
+<div id="modal-trading" class="modal-backdrop" style="display: none;">
+  <div class="modal-window" style="max-width: 600px; width: 90%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 8px;">
+      <h2 style="margin: 0;">PLAYER TRADING POST</h2>
+      <button class="btn btn-secondary" onclick="AppTrade.closeModal()">✕</button>
+    </div>
+
+    <!-- Search Section -->
+    <div style="margin: 16px 0;">
+      <input type="text" id="trade-search-input" placeholder="Search player by username..." 
+             style="width: 100%; padding: 8px; box-sizing: border-box;" 
+             oninput="AppTrade.searchUsers(this.value)">
+      <div id="trade-user-results" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- 1v1 Trade Floor -->
+    <div id="trade-stage" style="display: none; border-top: 1px solid #333; padding-top: 12px;">
+      <h4 id="trade-target-username" style="margin: 4px 0 12px 0;"></h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label style="font-size: 0.8rem; font-weight: bold;">YOU GIVE:</label>
+          <div id="trade-my-items" style="max-height: 180px; overflow-y: auto; border: 1px solid #444; padding: 6px;"></div>
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; font-weight: bold;">YOU RECEIVE:</label>
+          <div id="trade-their-items" style="max-height: 180px; overflow-y: auto; border: 1px solid #444; padding: 6px;"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top: 16px;" onclick="AppTrade.sendOffer()">
+        PROPOSE TRADE
+      </button>
+    </div>
+
+    <!-- Active Trades List -->
+    <div style="margin-top: 20px; border-top: 2px solid #333; padding-top: 10px;">
+      <h3>ACTIVE PROPOSALS</h3>
+      <div id="trade-inbox-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Load script at the bottom -->
+<script src="js/TradeMain.js"></script>
+
   <!-- ================= AUTH VIEW ================= -->
   <div id="view-auth" class="modal-overlay">
     <div class="card auth-box">
@@ -84,6 +129,7 @@
         <button class="nav-item" onclick="AppUI.switchTab('inventory')">🎒 VAULT</button>
         <button class="nav-item" onclick="AppUI.switchTab('trades')">🔄 TRADES <span id="nav-trade-badge" class="badge-count" style="display:none;">0</span></button>
         <button class="nav-item" onclick="AppUI.switchTab('leaderboard')">👑 RANKS</button>
+        <button class="btn btn-primary" onclick="AppTrade.openModal()">TRADE</button>
         <button id="nav-admin-btn" class="nav-item" style="display: none;" onclick="AppUI.switchTab('admin')">⚙️ DEV TOOLS</button>
       </nav>
 
