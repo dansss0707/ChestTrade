@@ -527,11 +527,14 @@ input:focus {
 }
 
 #chest-grid .card img {
-  width: 90px !important;
-  height: 90px !important;
+  width: 110px !important;
+  height: 110px !important;
+  max-width: 110px !important;
+  max-height: 110px !important;
   object-fit: contain !important;
   image-rendering: pixelated !important;
-  transform: scale(2.8) !important; /* <--- THIS FORCIBLY BLOWS IT UP */
-  margin: 45px auto !important;     /* Breathing room so the scale doesn't overlap text */
+  transform: none !important;
+  margin: 10px auto !important;
   display: block !important;
+  filter: drop-shadow(0 4px 0px #000000);
 }
