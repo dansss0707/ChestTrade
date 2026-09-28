@@ -48,16 +48,16 @@ window.AppChest = {
         var imgSrc = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
 
         card.innerHTML =
-          '<div style="margin: 4px 0; display: flex; justify-content: center; align-items: center; height: 60px;">' +
-            '<img src="' + imgSrc + '" alt="' + c.name + '" ' +
-              'style="width: 48px !important; height: 48px !important; max-width: 48px !important; max-height: 48px !important; object-fit: contain !important; image-rendering: pixelated; transform: scale(1) !important; margin: 0 auto; display: block;" ' +
-              'onerror="this.onerror=null; this.src=\'chest.png\';">' +
-          '</div>' +
-          '<h3 style="margin: 6px 0; font-size: 1rem; text-transform: uppercase;">' + c.name + '</h3>' +
-          '<p style="font-size: 0.8rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
-          '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
-            'OPEN [' + c.cost + 'G]' +
-          '</button>';
+  '<div style="margin: 0 auto; display: flex; justify-content: center; align-items: center; width: 64px; height: 64px; overflow: hidden;">' +
+    '<img src="' + imgSrc + '" alt="' + c.name + '" ' +
+      'style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; transform: scale(0.7) !important; object-fit: contain; image-rendering: pixelated; margin: 0; display: block;" ' +
+      'onerror="this.onerror=null; this.src=\'chest.png\';">' +
+  '</div>' +
+  '<h3 style="margin: 6px 0; font-size: 0.9rem; text-transform: uppercase;">' + c.name + '</h3>' +
+  '<p style="font-size: 0.75rem; color: #888; margin-bottom: 12px; flex-grow: 1;">' + (c.description || "") + '</p>' +
+  '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
+    'OPEN [' + c.cost + 'G]' +
+  '</button>';
 
         grid.appendChild(card);
       });
