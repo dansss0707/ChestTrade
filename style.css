@@ -526,21 +526,12 @@ input:focus {
   color: #000;
 }
 
-grid.innerHTML = "";
-
-      this.crates.forEach(function(c) {
-        var card = document.createElement("div");
-        card.className = "card";
-
-        var imagePath = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
-
-        card.innerHTML =
-          '<img src="' + imagePath + '" alt="' + c.name + '" onerror="this.onerror=null; this.src=\'chest.png\';">' +
-          '<h3 style="margin: 8px 0; font-size: 1rem; text-transform: uppercase;">' + c.name + '</h3>' +
-          '<p class="subtitle" style="margin-bottom: 16px; flex-grow: 1;">' + (c.description || "") + '</p>' +
-          '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
-            'OPEN [' + c.cost + 'G]' +
-          '</button>';
-
-        grid.appendChild(card);
-      });
+#chest-grid .card img {
+  width: 90px !important;
+  height: 90px !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  transform: scale(2.8) !important; /* <--- THIS FORCIBLY BLOWS IT UP */
+  margin: 45px auto !important;     /* Breathing room so the scale doesn't overlap text */
+  display: block !important;
+}
