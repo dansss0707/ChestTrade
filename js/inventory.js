@@ -1,5 +1,3 @@
-// js/inventory.js
-
 window.AppInventory = {
   items: [],
 
