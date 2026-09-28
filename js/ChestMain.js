@@ -40,14 +40,15 @@ window.AppChest = {
 
         var imgSrc = (c.icon && c.icon.indexOf(".") !== -1) ? c.icon : "chest.png";
 
-       // Change imgBox and img to this:
+        // THE FIX: An invisible, flexible wrapper that just centers whatever is inside it.
         var imgBox = document.createElement("div");
-        imgBox.style.cssText = "margin: 8px auto; display: flex; justify-content: center; align-items: center; width: 64px; height: 64px; padding: 4px; box-sizing: border-box; overflow: visible;";
+        imgBox.style.cssText = "display: flex; justify-content: center; align-items: center; width: 100%; min-height: 50px; margin: 5px 0;";
 
+        // THE FIX: An image that sizes itself naturally, but stops growing at 45px so it fits perfectly.
         var img = document.createElement("img");
         img.src = imgSrc;
         img.alt = c.name || "Crate";
-        img.style.cssText = "width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; image-rendering: pixelated; transform: none !important; display: block; margin: 0 auto;";
+        img.style.cssText = "max-width: 45px !important; max-height: 45px !important; width: auto !important; height: auto !important; object-fit: contain !important; image-rendering: pixelated !important; display: block !important; margin: 0 auto !important; padding: 0 !important; border: none !important;";
         img.onerror = function() {
           this.onerror = null;
           this.src = "chest.png";
