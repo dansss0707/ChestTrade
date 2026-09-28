@@ -3,13 +3,13 @@
 window.AppUI = {
   updateHUD: function() {
     if (!AppState.profile) return;
-    
+
     var coinsEl = document.getElementById("display-coins");
     var userEl = document.getElementById("display-username");
     if (coinsEl) coinsEl.innerText = AppState.profile.coins;
     if (userEl) userEl.innerText = "@" + AppState.profile.username;
 
-    // Show button ONLY if is_admin is true in Supabase profile
+    // Show Dev Tools button if user has is_admin set to true
     var adminBtn = document.getElementById("nav-admin-btn");
     if (adminBtn) {
       if (AppState.profile.is_admin === true) {
@@ -36,6 +36,11 @@ window.AppUI = {
     var targetPane = document.getElementById("tab-" + tabName);
     if (targetPane) targetPane.classList.add("active");
 
+    var activeBtn = Array.from(document.querySelectorAll(".nav-item")).find(function(btn) {
+      return btn.getAttribute("onclick") && btn.getAttribute("onclick").includes("'" + tabName + "'");
+    });
+    if (activeBtn) activeBtn.classList.add("active");
+
     AppState.activeTab = tabName;
 
     if (tabName === "chests" && window.AppChest && AppChest.init) {
@@ -44,6 +49,10 @@ window.AppUI = {
       AppInventory.loadVault();
     } else if (tabName === "admin" && window.AppAdmin && AppAdmin.init) {
       AppAdmin.init();
+    } else if (tabName === "trades" && window.AppTrade && AppTrade.init) {
+      AppTrade.init();
+    } else if (tabName === "leaderboard" && window.AppLeaderboard && AppLeaderboard.load) {
+      AppLeaderboard.load();
     }
   },
 
