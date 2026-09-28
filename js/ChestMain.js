@@ -6,50 +6,36 @@ window.AppChest = {
   generatedPicks: [],
   activeCrate: null,
 
-  // Trading State Variables
   selectedTradeUser: null,
   mySelectedTradeItem: null,
   theirSelectedTradeItem: null,
 
-  // Built-in Synthesizer for pack opening sounds (No audio files needed)
-  playSound: function(type) {
+  // Minimal mechanical blip generator
+  blip: function(freq, dur) {
     try {
       var ctx = new (window.AudioContext || window.webkitAudioContext)();
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-
-      if (type === "card-flip") {
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(320, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.25, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.15);
-      } else if (type === "legendary") {
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(440, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.35);
-        gain.gain.setValueAtTime(0.35, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.35);
-      }
-    } catch (e) {
-      // Audio autoplay policy guard
-    }
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.start();
+      osc.stop(ctx.currentTime + dur);
+    } catch (e) {}
   },
 
   init: async function() {
     await this.loadCrates();
   },
 
+  // 1. CRATES CATALOG
   loadCrates: async function() {
     var grid = document.getElementById("chest-grid");
     if (!grid) return;
-    grid.innerHTML = "<p style='color:#64748b; font-weight:700;'>> ESTABLISHING SECURE UPLINK...</p>";
+    grid.innerHTML = "<p style='color:var(--text-muted); font-size:0.8rem;'>> Querying registry...</p>";
 
     try {
       var res = await supabaseClient
@@ -59,54 +45,50 @@ window.AppChest = {
         .order("cost", { ascending: true });
 
       if (res.error) throw res.error;
-
       this.crates = res.data || [];
 
       if (this.crates.length === 0) {
-        grid.innerHTML = "<p style='color:#64748b; font-weight:700;'>> NO CRATES DETECTED IN SECTOR.</p>";
+        grid.innerHTML = "<p style='color:var(--text-muted); font-size:0.8rem;'>> No active crates.</p>";
         return;
       }
 
       grid.innerHTML = "";
-
       for (var i = 0; i < this.crates.length; i++) {
         var c = this.crates[i];
         var card = document.createElement("div");
-        card.className = "card";
+        card.className = "crate-card";
+
+        var tag = document.createElement("span");
+        tag.className = "crate-tag";
+        tag.innerText = "REF // 0" + (i + 1);
+
+        var iconBox = document.createElement("div");
+        iconBox.className = "crate-icon-box";
 
         var imgSrc = (c.icon && c.icon.indexOf(".") !== -1) ? c.icon : "chest.png";
-
-        var imgBox = document.createElement("div");
-        imgBox.style.cssText = "display: flex; justify-content: center; align-items: center; width: 100%; min-height: 52px; margin: 8px 0;";
-
         var img = document.createElement("img");
         img.src = imgSrc;
         img.alt = c.name || "Crate";
-        img.style.cssText = "max-width: 44px !important; max-height: 44px !important; width: auto !important; height: auto !important; object-fit: contain !important; image-rendering: pixelated; display: block; margin: 0 auto;";
-        img.onerror = function() {
-          this.onerror = null;
-          this.src = "chest.png";
-        };
-        imgBox.appendChild(img);
+        img.onerror = function() { this.onerror = null; this.src = "chest.png"; };
+        iconBox.appendChild(img);
 
-        var title = document.createElement("h3");
-        title.style.cssText = "margin: 8px 0 4px 0; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;";
+        var title = document.createElement("div");
+        title.className = "crate-title";
         title.innerText = c.name;
 
-        var desc = document.createElement("p");
-        desc.style.cssText = "font-size: 0.75rem; color: #94a3b8; margin-bottom: 16px; flex-grow: 1; line-height: 1.4;";
-        desc.innerText = c.description || "";
+        var desc = document.createElement("div");
+        desc.className = "crate-desc";
+        desc.innerText = c.description || "Standard issue asset supply.";
 
         var btn = document.createElement("button");
-        btn.className = "btn btn-primary btn-block";
-        btn.innerText = "OPEN [" + c.cost + "G]";
+        btn.className = "btn btn-action btn-block";
+        btn.innerText = "EXTRACT [" + c.cost + " CR]";
         (function(crateId) {
-          btn.onclick = function() {
-            AppChest.buyCrate(crateId);
-          };
+          btn.onclick = function() { AppChest.buyCrate(crateId); };
         })(c.id);
 
-        card.appendChild(imgBox);
+        card.appendChild(tag);
+        card.appendChild(iconBox);
         card.appendChild(title);
         card.appendChild(desc);
         card.appendChild(btn);
@@ -114,17 +96,69 @@ window.AppChest = {
         grid.appendChild(card);
       }
     } catch (err) {
-      grid.innerHTML = "<p style='color:#ef4444; font-weight:700;'>Data link corrupted: " + err.message + "</p>";
+      grid.innerHTML = "<p style='color:#ef4444; font-size:0.8rem;'>Error: " + err.message + "</p>";
     }
   },
 
+  // 2. VAULT STORAGE
+  loadVault: async function() {
+    var grid = document.getElementById("vault-grid");
+    if (!grid) return;
+    grid.innerHTML = "<p style='color:var(--text-muted); font-size:0.8rem;'>Reading inventory memory...</p>";
+
+    if (!AppState.user) {
+      grid.innerHTML = "<p style='color:var(--text-muted); font-size:0.8rem;'>No operative session detected.</p>";
+      return;
+    }
+
+    try {
+      var res = await supabaseClient
+        .from("user_inventory")
+        .select("id, item_templates (name, rarity, icon)")
+        .eq("user_id", AppState.user.id);
+
+      if (res.error) throw res.error;
+
+      if (!res.data || res.data.length === 0) {
+        grid.innerHTML = "<p style='color:var(--text-muted); font-size:0.8rem;'>Vault empty.</p>";
+        return;
+      }
+
+      grid.innerHTML = "";
+      res.data.forEach(function(row) {
+        var item = row.item_templates || { name: "Artifact", rarity: "common", icon: "📦" };
+        var card = document.createElement("div");
+        card.className = "vault-card rarity-" + (item.rarity || "common").toLowerCase();
+
+        var icon = document.createElement("span");
+        icon.style.cssText = "font-size: 2rem; margin-bottom: 6px;";
+        icon.innerText = item.icon || "📦";
+
+        var name = document.createElement("div");
+        name.style.cssText = "font-size: 0.78rem; font-weight: 700; color: #fff;";
+        name.innerText = item.name;
+
+        var pill = document.createElement("span");
+        pill.className = "rarity-pill";
+        pill.innerText = (item.rarity || "COMMON").toUpperCase();
+
+        card.appendChild(icon);
+        card.appendChild(name);
+        card.appendChild(pill);
+        grid.appendChild(card);
+      });
+    } catch (err) {
+      grid.innerHTML = "<p style='color:#ef4444; font-size:0.8rem;'>Vault read failure: " + err.message + "</p>";
+    }
+  },
+
+  // 3. PACK OPENING (CLEAN ARCADE EXTRACTION)
   buyCrate: async function(crateId) {
-    if (!AppState.profile) return;
     var crate = this.crates.find(function(c) { return c.id === crateId; });
     if (!crate) return;
 
-    if (AppState.profile.coins < crate.cost) {
-      alert("INSUFFICIENT FUNDS! Need " + crate.cost + "G.");
+    if (AppState.profile && AppState.profile.coins < crate.cost) {
+      alert("INSUFFICIENT CREDITS. Required: " + crate.cost + " CR");
       return;
     }
 
@@ -136,15 +170,14 @@ window.AppChest = {
       .eq("crate_id", crateId);
 
     if (res.error || !res.data || res.data.length === 0) {
-      alert("Anomaly detected: No artifacts discovered in this crate.");
+      alert("No data recovered for this crate.");
       return;
     }
 
     var items = res.data;
     this.generatedPicks = [];
     for (var i = 0; i < 3; i++) {
-      var pick = items[Math.floor(Math.random() * items.length)];
-      this.generatedPicks.push(pick);
+      this.generatedPicks.push(items[Math.floor(Math.random() * items.length)]);
     }
 
     this.selectedCardIndex = null;
@@ -156,56 +189,22 @@ window.AppChest = {
     var container = document.getElementById("cards-container");
     var title = document.getElementById("opening-chest-name");
     var btnCollect = document.getElementById("btn-collect-loot");
-    var rays = document.getElementById("god-rays");
 
-    if (title) title.innerText = "UNBOXING: " + this.activeCrate.name;
+    if (title) title.innerText = this.activeCrate.name.toUpperCase();
     if (btnCollect) btnCollect.style.display = "none";
-    if (rays) rays.classList.remove("active");
     if (container) container.innerHTML = "";
 
-    for (var idx = 0; idx < this.generatedPicks.length; idx++) {
-      (function(i, item) {
-        var cardEl = document.createElement("div");
-        cardEl.className = "flip-card";
-        cardEl.id = "pick-card-" + i;
-        cardEl.onclick = function() {
-          AppChest.revealPick(i);
-        };
+    this.generatedPicks.forEach(function(item, idx) {
+      var card = document.createElement("div");
+      card.className = "pick-card";
+      card.id = "pick-card-" + idx;
+      card.innerHTML = 
+        '<span style="font-size: 2rem; color: #475569; margin-bottom: 10px;">[ ? ]</span>' +
+        '<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">SLOT ' + (idx + 1) + '</div>';
 
-        var rarityKey = (item.rarity || "common").toLowerCase();
-
-        var inner = document.createElement("div");
-        inner.className = "flip-card-inner";
-
-        var front = document.createElement("div");
-        front.className = "flip-card-front";
-        front.innerHTML = '<span class="mystery-icon">❓</span><div class="pixel-tag" style="margin-top: 14px;">CARD 0' + (i + 1) + '</div>';
-
-        var back = document.createElement("div");
-        back.className = "flip-card-back rarity-" + rarityKey;
-
-        var iconSpan = document.createElement("span");
-        iconSpan.style.cssText = "font-size: 3.2rem; margin-bottom: 8px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));";
-        iconSpan.innerText = item.icon || "💎";
-
-        var nameDiv = document.createElement("div");
-        nameDiv.style.cssText = "font-size: 0.85rem; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.5px; color: #fff;";
-        nameDiv.innerText = item.name;
-
-        var rarityDiv = document.createElement("div");
-        rarityDiv.className = "pixel-tag";
-        rarityDiv.innerText = (item.rarity || "COMMON").toUpperCase();
-
-        back.appendChild(iconSpan);
-        back.appendChild(nameDiv);
-        back.appendChild(rarityDiv);
-
-        inner.appendChild(front);
-        inner.appendChild(back);
-        cardEl.appendChild(inner);
-        container.appendChild(cardEl);
-      })(idx, this.generatedPicks[idx]);
-    }
+      card.onclick = function() { AppChest.revealPick(idx); };
+      container.appendChild(card);
+    });
 
     if (modal) modal.style.display = "flex";
   },
@@ -216,49 +215,51 @@ window.AppChest = {
 
     var chosenItem = this.generatedPicks[selectedIndex];
     var pickedCard = document.getElementById("pick-card-" + selectedIndex);
-    var modal = document.getElementById("modal-opening");
-    var rays = document.getElementById("god-rays");
-
     var isLegendary = (chosenItem.rarity || "").toLowerCase() === "legendary";
-    this.playSound(isLegendary ? "legendary" : "card-flip");
 
-    if (rays) rays.classList.add("active");
-    if (modal) {
-      modal.classList.remove("shake-impact");
-      void modal.offsetWidth;
-      modal.classList.add("shake-impact");
+    this.blip(isLegendary ? 580 : 380, 0.2);
+
+    // Reveal picked slot
+    if (pickedCard) {
+      pickedCard.classList.add("revealed");
+      if (isLegendary) pickedCard.classList.add("legendary-hit");
+      pickedCard.innerHTML = 
+        '<span style="font-size: 2.5rem; margin-bottom: 8px;">' + (chosenItem.icon || "📦") + '</span>' +
+        '<div style="font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 4px;">' + chosenItem.name + '</div>' +
+        '<div class="rarity-pill rarity-' + (chosenItem.rarity || "common").toLowerCase() + '">' + (chosenItem.rarity || "COMMON").toUpperCase() + '</div>';
     }
 
-    if (pickedCard) pickedCard.classList.add("flipped");
-
+    // Reveal remaining unselected slots dimmed
     setTimeout(function() {
-      for (var idx = 0; idx < 3; idx++) {
+      [0, 1, 2].forEach(function(idx) {
         if (idx !== selectedIndex) {
           var other = document.getElementById("pick-card-" + idx);
-          if (other) other.classList.add("flipped", "missed");
+          var otherItem = AppChest.generatedPicks[idx];
+          if (other) {
+            other.classList.add("revealed", "missed");
+            other.innerHTML = 
+              '<span style="font-size: 2rem; margin-bottom: 6px;">' + (otherItem.icon || "📦") + '</span>' +
+              '<div style="font-size: 0.75rem; color: var(--text-muted);">' + otherItem.name + '</div>';
+          }
         }
-      }
-    }, 450);
+      });
+    }, 250);
 
-    var rpcRes = await supabaseClient.rpc("claim_card", {
+    // Save claim
+    await supabaseClient.rpc("claim_card", {
       p_user_id: AppState.user.id,
       p_template_id: chosenItem.id,
       p_cost: this.activeCrate.cost
     });
 
-    if (rpcRes.error) {
-      alert("Claim transmission failure: " + rpcRes.error.message);
-      return;
+    if (AppState.profile) {
+      AppState.profile.coins -= this.activeCrate.cost;
+      if (window.AppUI) AppUI.updateHUD();
     }
-
-    AppState.profile.coins -= this.activeCrate.cost;
-    var coinDisplay = document.getElementById("user-coins");
-    if (coinDisplay) coinDisplay.innerText = AppState.profile.coins;
-    if (window.AppUI && AppUI.updateHUD) AppUI.updateHUD();
 
     var btnCollect = document.getElementById("btn-collect-loot");
     if (btnCollect) {
-      btnCollect.innerText = "COLLECT " + chosenItem.name.toUpperCase() + " (#" + rpcRes.data.serial_number + ")";
+      btnCollect.innerText = "STORE " + chosenItem.name.toUpperCase();
       btnCollect.style.display = "block";
     }
   },
@@ -266,13 +267,10 @@ window.AppChest = {
   collectAndClose: function() {
     var modal = document.getElementById("modal-opening");
     if (modal) modal.style.display = "none";
-    if (window.AppInventory && AppInventory.loadVault) {
-      AppInventory.loadVault();
-    }
+    this.loadVault();
   },
 
-  // ================= INTEGRATED TRADING POST LOGIC =================
-
+  // 4. TRADING PROTOCOL
   openTradeModal: function() {
     var modal = document.getElementById("modal-trading");
     if (modal) modal.style.display = "flex";
@@ -285,43 +283,35 @@ window.AppChest = {
   },
 
   searchUsers: async function(query) {
-    var resultsEl = document.getElementById("trade-user-results");
-    if (!resultsEl) return;
+    var results = document.getElementById("trade-user-results");
+    if (!results) return;
 
     if (!query || query.trim().length < 2) {
-      resultsEl.innerHTML = "";
+      results.innerHTML = "";
       return;
     }
 
-    resultsEl.innerHTML = "<p style='color:#64748b; font-size:0.8rem;'>> LOCATING AGENT...</p>";
-
+    var myId = AppState.user ? AppState.user.id : "00000000-0000-0000-0000-000000000000";
     var res = await supabaseClient
       .from("profiles")
       .select("id, username")
-      .neq("id", AppState.user.id)
+      .neq("id", myId)
       .ilike("username", "%" + query.trim() + "%")
       .limit(4);
 
-    if (res.error) {
-      resultsEl.innerHTML = "<p style='color:#ef4444; font-size:0.8rem;'>Error: " + res.error.message + "</p>";
+    if (res.error || !res.data || res.data.length === 0) {
+      results.innerHTML = "<p style='color:var(--text-muted); font-size:0.75rem; padding: 4px 0;'>No matching handles found.</p>";
       return;
     }
 
-    if (!res.data || res.data.length === 0) {
-      resultsEl.innerHTML = "<p style='color:#64748b; font-size:0.8rem;'>> NO OPERATIVE FOUND.</p>";
-      return;
-    }
-
-    resultsEl.innerHTML = "";
+    results.innerHTML = "";
     res.data.forEach(function(u) {
       var btn = document.createElement("button");
-      btn.className = "btn btn-secondary";
-      btn.style.cssText = "width: 100%; margin-top: 4px; text-align: left; padding: 8px 12px; font-size: 0.85rem;";
-      btn.innerText = "🎮 " + u.username;
-      btn.onclick = function() {
-        AppChest.selectTradeTarget(u);
-      };
-      resultsEl.appendChild(btn);
+      btn.className = "btn";
+      btn.style.cssText = "width: 100%; text-align: left; margin-top: 4px; font-size: 0.75rem;";
+      btn.innerText = "> " + u.username;
+      btn.onclick = function() { AppChest.selectTradeTarget(u); };
+      results.appendChild(btn);
     });
   },
 
@@ -331,43 +321,42 @@ window.AppChest = {
     this.theirSelectedTradeItem = null;
 
     var header = document.getElementById("trade-target-username");
-    if (header) header.innerText = "UPLINK ESTABLISHED WITH: " + user.username.toUpperCase();
+    if (header) header.innerText = "CONNECTED: @" + user.username.toUpperCase();
 
     var stage = document.getElementById("trade-stage");
     if (stage) stage.style.display = "block";
 
+    var myId = AppState.user ? AppState.user.id : "";
     await Promise.all([
-      this.loadTradeVault("trade-my-items", AppState.user.id, true),
-      this.loadTradeVault("trade-their-items", user.id, false)
+      this.populateTradeShelf("trade-my-items", myId, true),
+      this.populateTradeShelf("trade-their-items", user.id, false)
     ]);
   },
 
-  loadTradeVault: async function(elementId, userId, isSelf) {
-    var container = document.getElementById(elementId);
-    if (!container) return;
-    container.innerHTML = "<p style='font-size:0.75rem; color:#64748b; grid-column: 1/-1;'>Accessing vault...</p>";
+  populateTradeShelf: async function(elementId, userId, isSelf) {
+    var shelf = document.getElementById(elementId);
+    if (!shelf) return;
+    shelf.innerHTML = "<p style='font-size:0.7rem; color:var(--text-muted);'>Querying items...</p>";
 
     var res = await supabaseClient
       .from("user_inventory")
-      .select("id, item_templates (name, rarity, icon)")
+      .select("id, item_templates (name, icon)")
       .eq("user_id", userId);
 
     if (res.error || !res.data || res.data.length === 0) {
-      container.innerHTML = "<p style='font-size:0.75rem; color:#64748b; grid-column: 1/-1;'>Vault empty.</p>";
+      shelf.innerHTML = "<p style='font-size:0.7rem; color:var(--text-muted);'>None available.</p>";
       return;
     }
 
-    container.innerHTML = "";
+    shelf.innerHTML = "";
     res.data.forEach(function(row) {
       var item = row.item_templates;
       var el = document.createElement("div");
-      el.className = "trade-slot-card";
-      el.innerHTML = "<span style='font-size:1.4rem;'>" + (item.icon || "💎") + "</span><span style='margin-top:4px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;'>" + item.name + "</span>";
+      el.className = "trade-shelf-item";
+      el.innerHTML = "<span style='font-size:1.2rem;'>" + (item.icon || "📦") + "</span><div style='margin-top:2px; font-weight:700;'>" + item.name + "</div>";
 
       el.onclick = function() {
-        document.querySelectorAll("#" + elementId + " .trade-slot-card").forEach(function(c) {
-          c.classList.remove("selected");
-        });
+        document.querySelectorAll("#" + elementId + " .trade-shelf-item").forEach(c => c.classList.remove("selected"));
         el.classList.add("selected");
         if (isSelf) {
           AppChest.mySelectedTradeItem = row.id;
@@ -375,20 +364,19 @@ window.AppChest = {
           AppChest.theirSelectedTradeItem = row.id;
         }
       };
-
-      container.appendChild(el);
+      shelf.appendChild(el);
     });
   },
 
   sendTradeOffer: async function() {
-    if (!this.selectedTradeUser) return alert("Select an operative first.");
-    if (!this.mySelectedTradeItem) return alert("Select an item from your vault to offer.");
-    if (!this.theirSelectedTradeItem) return alert("Select an item from their vault to request.");
+    if (!this.selectedTradeUser) return alert("Select an operative.");
+    if (!this.mySelectedTradeItem) return alert("Select an item to give.");
+    if (!this.theirSelectedTradeItem) return alert("Select an item to take.");
 
     var res = await supabaseClient
       .from("trades")
       .insert({
-        sender_id: AppState.user.id,
+        sender_id: AppState.user ? AppState.user.id : null,
         receiver_id: this.selectedTradeUser.id,
         sender_item_id: this.mySelectedTradeItem,
         receiver_item_id: this.theirSelectedTradeItem,
@@ -396,92 +384,67 @@ window.AppChest = {
       });
 
     if (res.error) {
-      alert("Proposal transmission failed: " + res.error.message);
+      alert("Failed: " + res.error.message);
       return;
     }
 
-    alert("Trade proposal dispatched to " + this.selectedTradeUser.username + "!");
+    alert("Proposal logged.");
     this.closeTradeModal();
   },
 
   loadPendingTrades: async function() {
     var inbox = document.getElementById("trade-inbox-list");
-    if (!inbox) return;
+    if (!inbox || !AppState.user) return;
 
     var res = await supabaseClient
       .from("trades")
-      .select("id, status, sender_id, receiver_id, created_at")
+      .select("id, status, sender_id, receiver_id")
       .or("sender_id.eq." + AppState.user.id + ",receiver_id.eq." + AppState.user.id)
       .eq("status", "pending");
 
     if (res.error || !res.data || res.data.length === 0) {
-      inbox.innerHTML = "<p style='color:#64748b; font-size:0.75rem;'>No pending transmissions.</p>";
+      inbox.innerHTML = "<p style='color:var(--text-muted); font-size:0.72rem; padding: 4px 0;'>No active proposals.</p>";
       return;
     }
 
     inbox.innerHTML = "";
     res.data.forEach(function(t) {
       var isIncoming = t.receiver_id === AppState.user.id;
-      var card = document.createElement("div");
-      card.className = "trade-inbox-card";
-      card.innerHTML = "<div><span style='font-size:0.8rem; font-weight:800; color:" + (isIncoming ? "#38bdf8" : "#fbbf24") + ";'>" + (isIncoming ? "INCOMING PROPOSAL" : "OUTGOING PROPOSAL") + "</span></div>";
+      var row = document.createElement("div");
+      row.className = "trade-inbox-row";
+      row.innerHTML = "<span>" + (isIncoming ? "[INCOMING OFFER]" : "[SENT OFFER]") + "</span>";
 
       var actions = document.createElement("div");
-      actions.style.display = "flex";
-      actions.style.gap = "8px";
-
       if (isIncoming) {
-        var btnAccept = document.createElement("button");
-        btnAccept.className = "btn btn-primary";
-        btnAccept.style.padding = "6px 14px";
-        btnAccept.innerText = "Accept";
-        btnAccept.onclick = function() { AppChest.acceptTrade(t.id); };
-
-        var btnDecline = document.createElement("button");
-        btnDecline.className = "btn btn-secondary";
-        btnDecline.style.padding = "6px 14px";
-        btnDecline.innerText = "Decline";
-        btnDecline.onclick = function() { AppChest.updateTradeStatus(t.id, "declined"); };
-
-        actions.appendChild(btnAccept);
-        actions.appendChild(btnDecline);
+        var btnAcc = document.createElement("button");
+        btnAcc.className = "btn btn-action";
+        btnAcc.style.padding = "4px 8px";
+        btnAcc.innerText = "ACCEPT";
+        btnAcc.onclick = function() { AppChest.acceptTrade(t.id); };
+        actions.appendChild(btnAcc);
       } else {
-        var btnCancel = document.createElement("button");
-        btnCancel.className = "btn btn-secondary";
-        btnCancel.style.padding = "6px 14px";
-        btnCancel.innerText = "Withdraw";
-        btnCancel.onclick = function() { AppChest.updateTradeStatus(t.id, "canceled"); };
-        actions.appendChild(btnCancel);
+        var btnCan = document.createElement("button");
+        btnCan.className = "btn";
+        btnCan.style.padding = "4px 8px";
+        btnCan.innerText = "CANCEL";
+        btnCan.onclick = function() { AppChest.updateTradeStatus(t.id, "canceled"); };
+        actions.appendChild(btnCan);
       }
-
-      card.appendChild(actions);
-      inbox.appendChild(card);
+      row.appendChild(actions);
+      inbox.appendChild(row);
     });
   },
 
   acceptTrade: async function(tradeId) {
     var res = await supabaseClient.rpc("execute_trade", { p_trade_id: tradeId });
-    if (res.error) {
-      alert("Exchange failed: " + res.error.message);
-      return;
-    }
-
-    alert("Exchange confirmed! Items reallocated in your vault.");
-    if (window.AppInventory && AppInventory.loadVault) AppInventory.loadVault();
+    if (res.error) return alert("Trade error: " + res.error.message);
+    alert("Transaction cleared.");
     this.loadPendingTrades();
+    this.loadVault();
   },
 
   updateTradeStatus: async function(tradeId, newStatus) {
-    var res = await supabaseClient
-      .from("trades")
-      .update({ status: newStatus })
-      .eq("id", tradeId);
-
-    if (res.error) {
-      alert("Error: " + res.error.message);
-      return;
-    }
-
+    await supabaseClient.from("trades").update({ status: newStatus }).eq("id", tradeId);
     this.loadPendingTrades();
   }
 };
