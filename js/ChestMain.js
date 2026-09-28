@@ -37,15 +37,12 @@ window.AppChest = {
         var card = document.createElement("div");
         card.className = "card";
 
-        // Determine if it's an image file or fallback to chest.png
         var imagePath = (c.icon && c.icon.includes(".")) ? c.icon : "chest.png";
 
         card.innerHTML =
-          '<div style="margin: 15px 0; display: flex; justify-content: center; align-items: center; min-height: 140px;">' +
-            '<img src="' + imagePath + '" alt="' + c.name + '" style="width: 130px; height: 130px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));" onerror="this.onerror=null; this.src=\'chest.png\';">' +
-          '</div>' +
-          '<h3 style="margin: 6px 0; font-size: 1.1rem; text-transform: uppercase;">' + c.name + '</h3>' +
-          '<p style="font-size: 0.8rem; color: #888; margin-bottom: 16px; flex-grow: 1;">' + (c.description || "") + '</p>' +
+          '<img src="' + imagePath + '" alt="' + c.name + '" onerror="this.onerror=null; this.src=\'chest.png\';">' +
+          '<h3 style="margin: 8px 0; font-size: 1rem; text-transform: uppercase;">' + c.name + '</h3>' +
+          '<p class="subtitle" style="margin-bottom: 16px; flex-grow: 1;">' + (c.description || "") + '</p>' +
           '<button class="btn btn-primary btn-block" onclick="AppChest.buyCrate(\'' + c.id + '\')">' +
             'OPEN [' + c.cost + 'G]' +
           '</button>';
