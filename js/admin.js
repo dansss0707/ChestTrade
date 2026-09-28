@@ -31,7 +31,7 @@ window.AppAdmin = {
     res.data.forEach(function(c) {
       var opt = document.createElement("option");
       opt.value = c.id;
-      opt.innerText = (c.icon || "📦") + " " + c.name;
+      opt.innerText = "📦 " + c.name;
       select.appendChild(opt);
     });
   },
@@ -39,12 +39,13 @@ window.AppAdmin = {
   createCrate: async function() {
     var nameInput = document.getElementById("admin-crate-name");
     var costInput = document.getElementById("admin-crate-cost");
-    var iconInput = document.getElementById("admin-crate-icon");
+    var imageInput = document.getElementById("admin-crate-image");
     var descInput = document.getElementById("admin-crate-desc");
 
     var name = nameInput ? nameInput.value.trim() : "";
     var cost = costInput ? parseInt(costInput.value, 10) : NaN;
-    var icon = (iconInput && iconInput.value.trim()) ? iconInput.value.trim() : "📦";
+    // Defaults automatically to chest.png
+    var crateImage = (imageInput && imageInput.value.trim()) ? imageInput.value.trim() : "chest.png";
     var desc = descInput ? descInput.value.trim() : "";
 
     if (!name) {
@@ -56,7 +57,7 @@ window.AppAdmin = {
       return;
     }
 
-    // Explicitly generate a unique text ID so it can never be null
+    // Explicit unique ID so it never sends null to Supabase
     var uniqueSuffix = Math.random().toString(36).substring(2, 8);
     var crateId = "crate_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + uniqueSuffix;
 
@@ -70,7 +71,7 @@ window.AppAdmin = {
             id: crateId,
             name: name,
             cost: cost,
-            icon: icon,
+            icon: crateImage,
             description: desc,
             is_active: true
           }
@@ -82,7 +83,7 @@ window.AppAdmin = {
 
       nameInput.value = "";
       costInput.value = "";
-      iconInput.value = "";
+      if (imageInput) imageInput.value = "";
       descInput.value = "";
 
       await this.populateCrateDropdown();
@@ -122,7 +123,6 @@ window.AppAdmin = {
       return;
     }
 
-    // Explicitly generate a unique text ID so it can never be null
     var uniqueSuffix = Math.random().toString(36).substring(2, 8);
     var itemId = "item_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + uniqueSuffix;
 
