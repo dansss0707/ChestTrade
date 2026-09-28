@@ -1,35 +1,28 @@
 // js/app.js
+// js/app.js
 
 const AppUI = {
-  // Tab Switching
-  switchTab(tabId) {
-    AppState.activeTab = tabId;
-    
-    // Update navigation active states
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    event.target.classList.add('active');
-
-    // Show selected pane
-    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-    const targetPane = document.getElementById(`tab-${tabId}`);
-    if (targetPane) targetPane.classList.add('active');
-
-    // Trigger tab-specific refresh
-    if (tabId === 'inventory' && window.AppInventory) AppInventory.loadVault();
-    if (tabId === 'trades' && window.AppTrade) AppTrade.refreshView();
-    if (tabId === 'leaderboard' && window.AppLeaderboard) AppLeaderboard.loadRankings();
-  },
-
-  // Close the Login Briefing Modal
-  closeBriefing() {
-    document.getElementById('modal-briefing').style.display = 'none';
-  },
-
-  // Update HUD Display
-  updateHUD() {
+  updateHUD: function() {
     if (!AppState.profile) return;
-    document.getElementById('display-coins').innerText = Number(AppState.profile.coins).toLocaleString();
-    document.getElementById('display-username').innerText = `@${AppState.profile.username}`;
+    const coinsEl = document.getElementById("display-coins");
+    const userEl = document.getElementById("display-username");
+    if (coinsEl) coinsEl.innerText = AppState.profile.coins;
+    if (userEl) userEl.innerText = "@" + AppState.profile.username;
+  },
+
+  switchTab: function(tabName) {
+    document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+
+    const targetPane = document.getElementById("tab-" + tabName);
+    if (targetPane) targetPane.classList.add("active");
+
+    AppState.activeTab = tabName;
+  },
+
+  closeBriefing: function() {
+    const modal = document.getElementById("modal-briefing");
+    if (modal) modal.style.display = "none";
   }
 };
 
