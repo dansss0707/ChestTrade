@@ -9,7 +9,7 @@ window.AppUI = {
     if (coinsEl) coinsEl.innerText = AppState.profile.coins;
     if (userEl) userEl.innerText = "@" + AppState.profile.username;
 
-    // Show Dev Tools button if user has is_admin set to true
+    // Show DEV TOOLS button if user has admin privileges
     var adminBtn = document.getElementById("nav-admin-btn");
     if (adminBtn) {
       if (AppState.profile.is_admin === true) {
@@ -43,6 +43,7 @@ window.AppUI = {
 
     AppState.activeTab = tabName;
 
+    // Load active tab data
     if (tabName === "chests" && window.AppChest && AppChest.init) {
       AppChest.init();
     } else if (tabName === "inventory" && window.AppInventory && AppInventory.loadVault) {
