@@ -42,12 +42,12 @@ window.AppChest = {
 
        // Change imgBox and img to this:
         var imgBox = document.createElement("div");
-        imgBox.style.cssText = "margin: 8px auto; display: flex; justify-content: center; align-items: center; width: 100%; height: 48px; overflow: visible;";
+        imgBox.style.cssText = "margin: 8px auto; display: flex; justify-content: center; align-items: center; width: 64px; height: 64px; padding: 4px; box-sizing: border-box; overflow: visible;";
 
         var img = document.createElement("img");
         img.src = imgSrc;
         img.alt = c.name || "Crate";
-        img.style.cssText = "width: auto !important; height: 44px !important; max-width: 90% !important; max-height: 44px !important; transform: none !important; object-fit: contain; image-rendering: pixelated; display: block; margin: 0 auto;";
+        img.style.cssText = "width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; image-rendering: pixelated; transform: none !important; display: block; margin: 0 auto;";
         img.onerror = function() {
           this.onerror = null;
           this.src = "chest.png";
