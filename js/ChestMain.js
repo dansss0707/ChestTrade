@@ -1,5 +1,3 @@
-// js/ChestMain.js
-
 window.AppChest = {
   crates: [],
   selectedCardIndex: null,
